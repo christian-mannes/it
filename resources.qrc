@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/light/arrow-left.svg</file>
+        <file>icons/light/arrow-right.svg</file>
+        <file>icons/light/check-circle.svg</file>
+        <file>icons/light/check.svg</file>
+        <file>icons/light/code.svg</file>
+        <file>icons/light/edit-2.svg</file>
+        <file>icons/light/edit-3.svg</file>
+        <file>icons/light/edit.svg</file>
+        <file>icons/light/help-circle.svg</file>
+        <file>icons/light/image.svg</file>
+        <file>icons/light/play.svg</file>
+        <file>icons/light/x-octagon.svg</file>
+        <file>icons/light/zoom-in.svg</file>
+        <file>icons/light/zoom-out.svg</file>
+    </qresource>
+</RCC>
