@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
+    <width>1280</width>
     <height>768</height>
    </rect>
   </property>
@@ -22,52 +22,42 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QTreeView" name="treeView">
+     <widget class="TreeView" name="treeView">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>0</height>
-       </size>
+      <property name="styleSheet">
+       <string notr="true">      QTreeView {
+        padding-left: 0px;
+	   margin-left: 0px;
+      }
+      QTreeView::branch {
+        width: 2px;
+		margin: 0px;
+      }
+      QTreeView::item {
+          padding: 0px 0px;
+          margin: 0px 0px;
+          min-height: 14px;
+      }
+      QTreeView::item:hover {
+          background-color: #e3f2fd;
+      }
+      QTreeView::item:selected {
+          background-color: #1976d2;
+          color: white;
+      }
+</string>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>180</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>8</width>
-        <height>16</height>
-       </size>
-      </property>
-      <property name="indentation">
-       <number>1</number>
-      </property>
-      <attribute name="headerVisible">
-       <bool>true</bool>
-      </attribute>
-      <attribute name="headerMinimumSectionSize">
-       <number>12</number>
-      </attribute>
      </widget>
     </item>
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="codeView">
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -139,7 +129,7 @@
 </string>
           </property>
           <property name="lineWrapMode">
-           <enum>QPlainTextEdit::NoWrap</enum>
+           <enum>QPlainTextEdit::LineWrapMode::NoWrap</enum>
           </property>
           <property name="tabStopDistance">
            <double>80.000000000000000</double>
@@ -249,7 +239,7 @@
            <bool>false</bool>
           </property>
           <property name="alignment">
-           <set>Qt::AlignCenter</set>
+           <set>Qt::AlignmentFlag::AlignCenter</set>
           </property>
           <widget class="ItView" name="itView">
            <property name="geometry">
@@ -279,9 +269,81 @@
             </size>
            </property>
            <property name="focusPolicy">
-            <enum>Qt::ClickFocus</enum>
+            <enum>Qt::FocusPolicy::ClickFocus</enum>
            </property>
           </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPlainTextEdit" name="debugView">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">    QPlainTextEdit {
+        background-color: #1a1a1a;
+        color: #d4d4d4;
+        font-family: 'Menlo','Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 12pt;
+        border: 1px solid #3c3c3c;
+        selection-background-color: #264f78;
+        selection-color: #ffffff;
+        line-height: 1.2;
+    }
+    
+    QPlainTextEdit:focus {
+        border: 1px solid #007acc;
+    }
+    
+    QScrollBar:vertical {
+        background-color: #2d2d30;
+        width: 12px;
+        border: none;
+    }
+    
+    QScrollBar::handle:vertical {
+        background-color: #686868;
+        border-radius: 6px;
+        min-height: 20px;
+    }
+    
+    QScrollBar::handle:vertical:hover {
+        background-color: #9e9e9e;
+    }
+    
+    QScrollBar::add-line:vertical,
+    QScrollBar::sub-line:vertical {
+        height: 0px;
+    }
+    
+    QScrollBar:horizontal {
+        background-color: #2d2d30;
+        height: 12px;
+        border: none;
+    }
+    
+    QScrollBar::handle:horizontal {
+        background-color: #686868;
+        border-radius: 6px;
+        min-width: 20px;
+    }
+    
+    QScrollBar::handle:horizontal:hover {
+        background-color: #9e9e9e;
+    }
+    
+    QScrollBar::add-line:horizontal,
+    QScrollBar::sub-line:horizontal {
+        width: 0px;
+    }
+</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
@@ -302,6 +364,8 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWebEngineView" name="helpView"/>
+      <widget class="QWebEngineView" name="notebookView"/>
      </widget>
     </item>
     <item>
@@ -334,7 +398,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>60</width>
+             <width>80</width>
              <height>16777215</height>
             </size>
            </property>
@@ -375,7 +439,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>60</width>
+             <width>80</width>
              <height>16777215</height>
             </size>
            </property>
@@ -403,7 +467,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>60</width>
+             <width>80</width>
              <height>16777215</height>
             </size>
            </property>
@@ -444,7 +508,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>60</width>
+             <width>80</width>
              <height>16777215</height>
             </size>
            </property>
@@ -501,10 +565,10 @@
             <number>600</number>
            </property>
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="tickPosition">
-            <enum>QSlider::TicksAbove</enum>
+            <enum>QSlider::TickPosition::TicksAbove</enum>
            </property>
            <property name="tickInterval">
             <number>100</number>
@@ -611,13 +675,13 @@
             </sizepolicy>
            </property>
            <property name="minimum">
-            <number>10</number>
+            <number>50</number>
            </property>
            <property name="maximum">
             <number>500</number>
            </property>
            <property name="singleStep">
-            <number>10</number>
+            <number>50</number>
            </property>
            <property name="pageStep">
             <number>100</number>
@@ -626,10 +690,10 @@
             <number>100</number>
            </property>
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="tickPosition">
-            <enum>QSlider::TicksAbove</enum>
+            <enum>QSlider::TickPosition::TicksAbove</enum>
            </property>
           </widget>
          </item>
@@ -645,7 +709,7 @@
             <bool>true</bool>
            </property>
            <property name="buttonSymbols">
-            <enum>QAbstractSpinBox::NoButtons</enum>
+            <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
            </property>
            <property name="minimum">
             <number>10</number>
@@ -738,7 +802,7 @@
             </sizepolicy>
            </property>
            <property name="selectionMode">
-            <enum>QAbstractItemView::SingleSelection</enum>
+            <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
            </property>
            <property name="showGrid">
             <bool>false</bool>
@@ -790,9 +854,19 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QCheckBox" name="singlethreaded_cb">
+            <widget class="QCheckBox" name="debug_cb">
              <property name="text">
-              <string>Single Threaded</string>
+              <string>Debug</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="multithread_cb">
+             <property name="text">
+              <string>Multithread</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -810,7 +884,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1024</width>
+     <width>1280</width>
      <height>24</height>
     </rect>
    </property>
@@ -819,20 +893,21 @@
      <string>File</string>
     </property>
     <addaction name="actionNew_Function"/>
-    <addaction name="actionNew_Folder"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="actionRevert_to_saved"/>
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
-    <addaction name="actionExport_as_GIF"/>
-    <addaction name="actionExport_as_EPS"/>
     <addaction name="actionExport_as_PNG"/>
     <addaction name="actionExport_as_SVG"/>
     <addaction name="actionExport_as_PDF"/>
     <addaction name="separator"/>
     <addaction name="actionPrint"/>
+    <addaction name="actionPrintPreview"/>
+    <addaction name="separator"/>
+    <addaction name="actionSet_Files_Folder"/>
+    <addaction name="actionClear_Settings"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -863,12 +938,15 @@
     </property>
     <addaction name="actionImage"/>
     <addaction name="actionCode"/>
+    <addaction name="separator"/>
+    <addaction name="actionNotebook"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
+    <addaction name="actionCheat_Sheet"/>
     <addaction name="actionHelp"/>
    </widget>
    <widget class="QMenu" name="menuColormap">
@@ -915,11 +993,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
-   </property>
-  </action>
-  <action name="actionNew_Folder">
-   <property name="text">
-    <string>New Folder</string>
    </property>
   </action>
   <action name="actionSave">
@@ -1126,10 +1199,35 @@
      <normaloff>:/icons/light/help-circle.svg</normaloff>:/icons/light/help-circle.svg</iconset>
    </property>
    <property name="text">
-    <string>Help</string>
+    <string>Manual</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="actionPrintPreview">
+   <property name="text">
+    <string>Print Preview</string>
+   </property>
+  </action>
+  <action name="actionSet_Files_Folder">
+   <property name="text">
+    <string>Set Files Folder</string>
+   </property>
+  </action>
+  <action name="actionClear_Settings">
+   <property name="text">
+    <string>Clear Settings</string>
+   </property>
+  </action>
+  <action name="actionCheat_Sheet">
+   <property name="text">
+    <string>Cheat Sheet</string>
+   </property>
+  </action>
+  <action name="actionNotebook">
+   <property name="text">
+    <string>Notebook</string>
    </property>
   </action>
  </widget>
@@ -1145,6 +1243,17 @@
    <extends>QWidget</extends>
    <header>colormappreview.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QWebEngineView</class>
+   <extends>QWidget</extends>
+   <header>qwebengineview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TreeView</class>
+   <extends>QTreeView</extends>
+   <header>tree.h</header>
   </customwidget>
  </customwidgets>
  <resources>

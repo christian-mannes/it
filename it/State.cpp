@@ -36,6 +36,7 @@ State::State(Function *function, Colormap *colormap, int w, int h) {
   width = height = 0;
   selx = sely = selX = selY = 0;
   xres = yres = 0;
+  maxDebug = 256;
   resize(w, h);
 }
 
@@ -209,8 +210,31 @@ void State::restoreArgs(Function *function) {
   }
 }
 
-#define FORM_FEED 12
+void State::start() {
+  debugLines.clear();
+}
+
+void State::setMaxDebug(int limit) {
+  maxDebug = limit;
+}
+
+void State::_debug(const std::string &str, bool newline) {
+  const std::lock_guard<std::mutex> lock(debugmutex);
+  if (debugLines.size() < maxDebug) {
+    if (debugnl || debugLines.empty()) {
+      debugLines.push_back(str);
+    } else {
+      debugLines.back() += str;
+    }
+    debugnl = newline;
+  } else if (debugLines.size() == maxDebug) {
+    debugLines.push_back("*** Too many debug messages. Try setMaxDebug(limit) with a higher value in your constructor. ***");
+  }
+}
+
 #if 0
+#define FORM_FEED 12
+
 void State::writeImage(FILE *fp) {
   uint index = 0, length = width * height;
   byte count, val;

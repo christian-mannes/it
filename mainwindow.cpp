@@ -1,5 +1,7 @@
 #include <QDir>
 #include <QFileInfo>
+#include <QFileDialog>
+#include <QInputDialog>
 #include <QDir>
 #include <QStandardPaths>
 #include <QDateTime>
@@ -9,15 +11,21 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QRegularExpression>
+#include <QWebEngineView>
+#include <QUrl>
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "Function.h"
 #include "paramsmodel.h"
 #include "syntaxhighlightercpp.h"
+#include "jupyter.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 
-#define IMAGE_TAB 1
 #define CODE_TAB 0
+#define IMAGE_TAB 1
+#define HELP_TAB 2
+#define NOTEBOOK_TAB 3
 
 MainWindow *mainWindow = nullptr;
 #define DEFAULT_COLORMAP "hot"
@@ -43,20 +51,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   function = nullptr;
   colormap = nullptr;
   state = nullptr;
+  jupyter = nullptr;
 
   dylib = nullptr;
   createfun = nullptr;
 
-  // Classic-style color maps (from files)
-  QString path = QDir::homePath() + "/Library/Application Support/It/Maps";
-  QDir dir(path);
-  QStringList files = dir.entryList(QStringList() << "*.map", QDir::Files);
-  foreach(QString filename, files) {
-    QAction* action = ui->menuColormap->addAction(filename);
-    action->setCheckable(true);
-    connect(action, &QAction::triggered, this, &MainWindow::on_choose_colormap_map);
-  }
-  ui->menuColormap->addSeparator();
   // New-style colormaps
   std::vector<std::string> newmaps;
   Colormap::getList(newmaps);
@@ -64,15 +63,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QString s(name.c_str());
     QAction* action = ui->menuColormap->addAction(s);
     action->setCheckable(true);
-    connect(action, &QAction::triggered, this, &MainWindow::on_choose_colormap_fun);
+    connect(action, &QAction::triggered, this, &MainWindow::on_chooseColormap);
   }
-
-  // Tree model for functions treeview
-  treemodel = initFunctionList();
-  ui->treeView->setModel(treemodel);
-  ui->treeView->show();
-  ui->treeView->expandAll();
-  connect(ui->treeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::on_choose_function);
+  ui->menuColormap->addSeparator();
 
   // Params model for parameters
   paramsmodel = new ParamsModel();
@@ -80,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->paramsTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
   ui->itView->setFocus();
-  connect(ui->itView, &ItView::renderFinished, this, &MainWindow::on_render_finish);
+  connect(ui->itView, &ItView::renderFinished, this, &MainWindow::on_renderFinish);
 
   // Code editor/errors
   codeHasChanged = false;
@@ -115,18 +108,54 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     }
   });
   ui->errorsView->hide();
+  ui->debugView->hide();
+  exportDirectory = QDir::homePath();
+  doSaveSettings = true;
 
   QTimer::singleShot(0, this, [this]() { // post-ui
-    loadSettings();
-    setColormap(currColormap);
-    if (savedFunction.isEmpty()) savedFunction = DEFAULT_FUNCTION_NAME;
-    treemodel->selectItem(ui->treeView, savedFunction, 0); // will call setFunction
+    postInit();
   });
 }
 
 MainWindow::~MainWindow() {
   delete ui;
   delete highlighter;
+}
+
+void MainWindow::postInit() {
+  loadSettings();
+  if (filesDirectory.isEmpty()) {
+    // first-time use, set up files directory and install color maps
+    firstTimeUse(true);
+  }
+
+  // Classic-style color maps (from files)
+  QString path = filesDirectory + "Maps";
+  QDir dir(path);
+  QStringList files = dir.entryList(QStringList() << "*.map", QDir::Files);
+  foreach(QString filename, files) {
+    QAction* action = ui->menuColormap->addAction(filename);
+    action->setCheckable(true);
+    connect(action, &QAction::triggered, this, &MainWindow::on_chooseColormap);
+  }
+
+  treemodel = initFunctionList();
+  ui->treeView->setTreeModel(treemodel);
+  ui->treeView->expandAll();
+  ui->treeView->preferredWidth = 160;
+  connect(ui->treeView, &TreeView::itemDoubleClicked, this, &MainWindow::treeItemDoubleClicked);
+  connect(ui->treeView, &TreeView::itemSelectionChanged, this, &MainWindow::treeSelectionChanged);
+  connect(treemodel, &TreeModel::itemMoved, this, &MainWindow::treeItemMoved);
+  connect(treemodel, &TreeModel::itemRenamed, this, &MainWindow::treeItemRenamed);
+  connect(treemodel, &TreeModel::itemAdded, this, &MainWindow::treeItemAdded);
+  connect(treemodel, &TreeModel::itemRemoved, this, &MainWindow::treeItemRemoved);
+  ui->treeView->setHeaderHidden(true);
+
+
+  setColormap(currColormap);
+  if (savedFunction.isEmpty()) savedFunction = DEFAULT_FUNCTION_NAME;
+  ui->treeView->selectItemByName(savedFunction, true);
+  qDebug() << "Files directory:" << filesDirectory;
 }
 
 void MainWindow::show_about() {
@@ -152,16 +181,12 @@ void MainWindow::show_about() {
 
   aboutBox.exec();
 }
+
 void MainWindow::loadSettings() {
   QSettings settings;
-  if (settings.contains("currFunction"))
-    savedFunction = settings.value("currFunction").toString();
-  if (settings.contains("currColormap"))
-    currColormap = settings.value("currColormap").toString();
-
-  if (settings.contains("geometry")) {
-    restoreGeometry(settings.value("geometry").toByteArray());
-  }
+  if (settings.contains("currFunction")) savedFunction = settings.value("currFunction").toString();
+  if (settings.contains("currColormap")) currColormap = settings.value("currColormap").toString();
+  if (settings.contains("geometry")) restoreGeometry(settings.value("geometry").toByteArray());
   if (settings.contains("windowState")) {
     QByteArray wstate = settings.value("windowState").toByteArray();
     restoreState(wstate);
@@ -169,15 +194,113 @@ void MainWindow::loadSettings() {
       setWindowState(windowState() | Qt::WindowMaximized);
     }
   }
+  if (settings.contains("exportDirectory")) exportDirectory = settings.value("exportDirectory").toString();
+  if (settings.contains("filesDirectory")) filesDirectory = settings.value("filesDirectory").toString();
 }
 
 void MainWindow::saveSettings() {
+  if (doSaveSettings) {
+    QSettings settings;
+    settings.setValue("currFunction", currFunction);
+    settings.setValue("currColormap", currColormap);
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
+    settings.setValue("isMaximized", isMaximized());
+    settings.setValue("exportDirectory", exportDirectory);
+    settings.setValue("filesDirectory", filesDirectory);
+  }
+}
+
+void MainWindow::on_actionClear_Settings_triggered() {
   QSettings settings;
-  settings.setValue("currFunction", currFunction);
-  settings.setValue("currColormap", currColormap);
-  settings.setValue("geometry", saveGeometry());
-  settings.setValue("windowState", saveState());
-  settings.setValue("isMaximized", isMaximized());
+  settings.clear();
+  doSaveSettings = false;
+  QMessageBox msgBox;
+  msgBox.setText("Your settings have been deleted");
+  msgBox.exec();
+}
+
+void MainWindow::firstTimeUse(bool acceptLegacy) {
+  qDebug() << "First time use...";
+  // Do we have the legacy directory ~/Library/Application Support/It ?
+  QString legacyPath = QDir::homePath() + "/Library/Application Support/It";
+  QDir legacyDir(legacyPath);
+  bool doPrompt = true;
+  if (legacyDir.exists() && acceptLegacy) { // use it on first time use (acceptLegacy)
+    filesDirectory = legacyPath + "/";
+    statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
+    doPrompt = false;
+  }
+  // If not, prompt user for a directory - repeat until we have one
+  if (doPrompt) {
+    QMessageBox msgBox;
+    msgBox.setText("Please select a directory for your function files");
+    msgBox.exec();
+    while (true) {
+      filesDirectory = QFileDialog::getExistingDirectory(this,
+          "Please select a directory for your function files",
+          QDir::homePath());
+      if (filesDirectory.isEmpty()) {
+        QMessageBox msgBox;
+        msgBox.setText("You must select a directory for your function files");
+        msgBox.exec();
+      } else {
+        filesDirectory += "/";
+        saveSettings();
+        break;
+      }
+    }
+  }
+  statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
+
+  // Install color maps
+  QFileInfo exe(QApplication::applicationDirPath() + "/It");
+  QFileInfo mapsdir(filesDirectory + "maps");
+  if (!mapsdir.exists() || mapsdir.lastModified() < exe.lastModified()) {
+    qDebug() << "Installing maps";
+    QString mapszip = QApplication::applicationDirPath() + "/../Resources/maps.zip";
+    QProcess process;
+    QStringList args;
+#ifdef Q_OS_WIN
+    args << zipPath << "-d" << extractDir;
+    process.start("powershell", QStringList() << "Expand-Archive" << args);
+#else
+    args << "-o" << mapszip << "-d" << filesDirectory;
+    process.start("unzip", args);
+    process.waitForFinished();
+    qDebug() << "Installed maps" << (process.exitCode() == 0 ? "ok" : "FAIL");
+#endif
+  }
+
+  // Install include files for compilation
+  QFileInfo itdir(filesDirectory + "it");
+  if (!itdir.exists() || itdir.lastModified() < exe.lastModified()) {
+    qDebug() << "Installing include files";
+    QString itzip = QApplication::applicationDirPath() + "/../Resources/it.zip";
+    QProcess process;
+    QStringList args;
+#ifdef Q_OS_WIN
+#else
+      args << "-o" << itzip << "-d" << filesDirectory;
+      process.start("unzip", args);
+      process.waitForFinished();
+      qDebug() << "Installed it" << (process.exitCode() == 0 ? "ok" : "FAIL");
+#endif
+  }
+
+  QString nbdirpath = filesDirectory + "notebooks";
+  QFileInfo nbdir(nbdirpath);
+  if (!nbdir.exists()) {
+    QDir fd(filesDirectory);
+    fd.mkpath(nbdirpath);
+  }
+
+  QString buildpath = filesDirectory + "build";
+  QFileInfo builddir(buildpath);
+  if (!builddir.exists()) {
+    QDir fd(filesDirectory);
+    fd.mkpath(buildpath);
+  }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -196,7 +319,33 @@ void MainWindow::on_actionImage_triggered() { // show code editor
   ui->stackedWidget->setCurrentIndex(IMAGE_TAB);
 }
 
-void MainWindow::on_choose_colormap_map() {
+void MainWindow::on_actionHelp_triggered() { // show help
+  ui->stackedWidget->setCurrentIndex(HELP_TAB);
+  ui->helpView->load(QUrl("https://mannes-tech.com/It/manual.html"));
+}
+
+void MainWindow::on_actionNotebook_triggered() { // show notebook
+  if (jupyter == nullptr) {
+    jupyter = new Jupyter(ui->notebookView, this);
+    jupyter->startServer(filesDirectory + "notebooks");
+    connect(jupyter, &Jupyter::serverReady, this, &MainWindow::on_jupyterReady);
+    connect(jupyter, &Jupyter::serverFailed, this, &MainWindow::on_jupyterFailed);
+    ui->stackedWidget->setCurrentIndex(NOTEBOOK_TAB);
+  } else {
+    ui->stackedWidget->setCurrentIndex(NOTEBOOK_TAB);
+    jupyter->loadNotebook("");
+  }
+}
+void MainWindow::on_jupyterReady() {
+  qDebug() << "READY";
+  jupyter->loadNotebook("");
+}
+void MainWindow::on_jupyterFailed() {
+  qDebug() << "FAILED";
+  statusBar()->showMessage("Failed to start Jupyter server. Is it installed?");
+}
+
+void MainWindow::on_chooseColormap() {
   QAction* action = qobject_cast<QAction*>(sender());
   if (!action) return;
   QString text = action->text();
@@ -206,22 +355,108 @@ void MainWindow::on_choose_colormap_map() {
   setColormap(text);
 }
 
-void MainWindow::on_choose_colormap_fun() {
-  QAction* action = qobject_cast<QAction*>(sender());
-  if (!action) return;
-  QString text = action->text();
-  for (QAction* a : ui->menuColormap->actions()) {
-    a->setChecked(a == action);
+void MainWindow::on_actionNew_Function_triggered() {
+  bool ok = false;
+  QString fname = QInputDialog::getText(this,
+    "New Function",
+    "Function name:", QLineEdit::Normal,
+    "", &ok);
+  if (ok && !fname.isEmpty()) {
+    QString src = QApplication::applicationDirPath() + "/../Resources/template.txt";
+    QString cpp = filesDirectory + name2file(fname) + ".cpp";
+    QFile::copy(src, cpp);
+    ui->treeView->addItem(fname);
+    //treemodel->selectItem(ui->treeView, fname, 0); // will call setFunction
+    saveFunctionList();
   }
-  setColormap(text);
 }
 
-void MainWindow::on_choose_function(const QModelIndex& current, const QModelIndex& previous) {
-  Q_UNUSED(previous);
-  if (current.isValid()) {
-    QString name = current.data(Qt::DisplayRole).toString();
-    setFunction(name);
+void MainWindow::on_actionSave_triggered() {
+  if (currFunction.isEmpty()) return;
+  if (!saveCode(currFunction, ui->codeEditor->toPlainText())) {
+    QMessageBox msgBox;
+    msgBox.setText(QString("Failed to save function %1").arg(currFunction)); // TODO: show why
+    msgBox.exec();
+    return;
   }
+  codeHasChanged = false;
+}
+
+void MainWindow::on_actionRevert_to_saved_triggered() {
+  if (currFunction.isEmpty()) return;
+  codeHasChanged = false;
+  codeHasErrors = false;
+  QString file = filesDirectory + name2file(currFunction) + ".cpp";
+  QFileInfo fileinfo(file);
+  if (fileinfo.exists()) {
+    QFile codefile(file);
+    if (codefile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      QTextStream stream(&codefile);
+      QString contents = stream.readAll();
+      ui->codeEditor->setPlainText(contents);
+    }
+  }
+}
+
+void MainWindow::on_actionSave_As_triggered() {
+  bool ok = false;
+  QString fname = QInputDialog::getText(this,
+    "New Function",
+    "Function name:", QLineEdit::Normal,
+    "", &ok);
+  if (ok && !fname.isEmpty()) {
+    QString src = filesDirectory + name2file(currFunction) + ".cpp";
+    QString cpp = filesDirectory + name2file(fname) + ".cpp";
+    QFile::copy(src, cpp);
+    ui->treeView->addItem(fname);
+    //treemodel->selectItem(ui->treeView, fname, 0); // will call setFunction
+    saveFunctionList();
+  }
+}
+
+void MainWindow::treeItemDoubleClicked(TreeItem* item) {
+  qDebug() << "doubleclicked" << item->displayName();
+  // double clicking just starts editing/renaming, ignore
+}
+void MainWindow::treeSelectionChanged(TreeItem* current, TreeItem* previous) {
+  qDebug() << "selection" << previous->displayName() << "==>" << current->displayName();
+  if (current) {
+    QString name = current->displayName();
+    if (current->isItem()) {
+      setFunction(name);
+    }
+  }
+}
+void MainWindow::treeItemRenamed(TreeItem* item, const QString& oldName, const QString& newName) {
+  if (item->isItem()) {
+    QString src = filesDirectory + name2file(oldName) + ".cpp";
+    QString dst = filesDirectory + name2file(newName) + ".cpp";
+    qDebug() << "renamed" << src << dst;
+    if (QFile::rename(src, dst)) {
+      saveFunctionList();
+    } else {
+      qDebug() << "Could not rename";
+    }
+  } else {
+    saveFunctionList();
+  }
+}
+void MainWindow::treeItemMoved(TreeItem* item, TreeItem* oldParent, TreeItem* newParent) {
+  saveFunctionList();
+  qDebug() << "moved" << item->displayName();
+}
+void MainWindow::treeItemAdded(TreeItem* item, TreeItem* parent) {
+  qDebug() << "added" << item->displayName();
+}
+void MainWindow::treeItemRemoved(TreeItem* item, TreeItem* parent) {
+  QString src = filesDirectory + name2file(item->displayName()) + ".cpp";
+  QFile::remove(src);
+  qDebug() << "removed" << item->displayName() << src;
+  saveFunctionList();
+}
+
+void MainWindow::on_actionDelete_triggered() {
+  ui->treeView->deleteItem();
 }
 
 void MainWindow::on_xmin_le_textChanged(const QString &arg1) {}
@@ -246,6 +481,11 @@ void MainWindow::on_dspace_radio_clicked() {
     ui->paramsTableView->show();
     if (state) state->function = function;
   }
+}
+
+void MainWindow::on_actionSet_Files_Folder_triggered() {
+  filesDirectory = "";
+  firstTimeUse(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -298,12 +538,18 @@ void MainWindow::on_actionStart_triggered() {
   function->state = state;
 
   ui->itView->thumbsize = ui->thumb_slider->value();
-  ui->itView->singlethreaded = ui->singlethreaded_cb->isChecked();
+  ui->itView->singlethreaded = !ui->multithread_cb->isChecked();
+  ui->itView->debug = ui->debug_cb->isChecked();
   ui->itView->annotate = ui->annotate_cb->isChecked();
   ui->itView->sandbox = ui->sandbox_cb->isChecked();
 
   ui->itView->startRender(function, state, colormap);
   ui->actionStop->setEnabled(false);
+  ui->debugView->hide();
+}
+
+void MainWindow::on_thumb_slider_actionTriggered(int action) {
+  ui->itView->thumbsize = ui->thumb_slider->value();
 }
 
 void MainWindow::on_actionStop_triggered() {
@@ -313,9 +559,18 @@ void MainWindow::on_actionStop_triggered() {
   statusBar()->showMessage("Stopped.");
 }
 
-void MainWindow::on_render_finish() {
+void MainWindow::on_renderFinish() {
   ui->actionStop->setEnabled(false);
   ui->actionBack->setEnabled(history.size() > 0);
+  if (ui->itView->debug) {
+    if (state->debugLines.size() > 0) {
+      for (const std::string &line: state->debugLines) {
+        ui->debugView->appendPlainText(QString(line.c_str()));
+        qDebug() << line;
+      }
+      ui->debugView->show();
+    }
+  }
 }
 
 void MainWindow::on_actionBack_triggered() {
@@ -340,8 +595,7 @@ void MainWindow::on_actionBack_triggered() {
   ui->actionBack->setEnabled(history.size() > 0);
 }
 
-void MainWindow::on_slider_res_valueChanged(int value)
-{
+void MainWindow::on_slider_res_valueChanged(int value) {
   double xmin = ui->xmin_le->text().toDouble();
   double xmax = ui->xmax_le->text().toDouble();
   double ymin = ui->ymin_le->text().toDouble();
@@ -351,6 +605,12 @@ void MainWindow::on_slider_res_valueChanged(int value)
   ui->slider_res->setValue(xres);
   ui->resolution_xres->setText(QString::number(xres));
   ui->resolution_yres->setText(QString::number(yres));
+}
+
+void MainWindow::on_thumb_slider_valueChanged(int value) {
+  int v = 50 * (value / 50);
+  ui->thumb_slider->setValue(v);
+  ui->itView->thumbsize = v;
 }
 
 void MainWindow::on_resolution_xres_textChanged(const QString &arg1)
@@ -378,6 +638,12 @@ void MainWindow::showDefaultCoordinates() {
   ui->ymax_le->setText(QString::number(function->defymax));
 }
 
+void MainWindow::on_actionExport_as_PNG_triggered() { ui->itView->exportToPNG(); }
+void MainWindow::on_actionExport_as_SVG_triggered() { ui->itView->exportToSVG(); }
+void MainWindow::on_actionExport_as_PDF_triggered() { ui->itView->exportToPDF(); }
+void MainWindow::on_actionPrint_triggered() { ui->itView->print();}
+void MainWindow::on_actionPrintPreview_triggered() { ui->itView->printPreview();}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::setColormap(const QString &name) {
@@ -387,7 +653,8 @@ void MainWindow::setColormap(const QString &name) {
   colormap = Colormap::getColormapByName(currColormap.toStdString());
   if (colormap == nullptr) {
     colormap = new Colormap();
-    QString path = QDir::homePath() + "/Library/Application Support/It/Maps/" + currColormap;
+    //QString path = QDir::homePath() + "/Library/Application Support/It/Maps/" + currColormap;
+    QString path = filesDirectory + "Maps/" + currColormap;
     colormap->load(path.toStdString());
   }
   ui->preview->setColormap(colormap);
@@ -395,15 +662,19 @@ void MainWindow::setColormap(const QString &name) {
 }
 
 TreeModel *MainWindow::initFunctionList() {
-  TreeModel *treemodel = new TreeModel(QStringList() << "Functions");
+  TreeModel *model = new TreeModel(this);
+  TreeItem *root = model->rootItem(), *folder = nullptr;
 
-  // Built-in functions (TODO: add some more)
-  treemodel->addFolder("Built-In");
-  builtin.insert(DEFAULT_FUNCTION_NAME);
-  treemodel->addEntry(DEFAULT_FUNCTION_NAME);
+  // Built-in functions (TODO: add some more) - not read from file
+  //treemodel->addFolder("Built-In");
+  builtin.insert(DEFAULT_FUNCTION_NAME); // add to builtin set
+  TreeItem *item = new TreeItem(DEFAULT_FUNCTION_NAME, TreeItem::Item);
+  item->readOnly = true;
+  root->appendChild(item);
 
   // Read f_list.txt file
-  QString path = QDir::homePath() + "/Library/Application Support/It/";
+  //QString path = QDir::homePath() + "/Library/Application Support/It/";
+  QString path = filesDirectory;
   QString listpath = path + "f_list.txt";
   QFile inputFile(listpath);
   if (inputFile.open(QIODevice::ReadOnly)) {
@@ -413,7 +684,8 @@ TreeModel *MainWindow::initFunctionList() {
       QStringList pieces = line.split("\\");
       if (pieces.count() < 1) continue;
       if (pieces[0].startsWith("*")) { // folder
-        treemodel->addFolder(pieces[0].mid(1));
+        folder = new TreeItem(pieces[0].mid(1), TreeItem::Folder);
+        root->appendChild(folder);
       } else if (pieces.count() >= 2) { // name (piece[0]), filename (piece[1])
         QString name = pieces[0];
         QString file = pieces[1];
@@ -429,16 +701,42 @@ TreeModel *MainWindow::initFunctionList() {
             }
           }
         }
-        treemodel->addEntry(name);
+        TreeItem *item = new TreeItem(name, TreeItem::Item);
+        if (folder) folder->appendChild(item); else root->appendChild(item);
       }
     }
     inputFile.close();
   }
-  return treemodel;
+  return model;
+}
+
+void MainWindow::saveFunctionList_(QTextStream &ts, TreeItem *item) {
+  if (item->isFolder()) {
+    if (item->parent())
+      ts << "*" << item->displayName() << '\n';
+    for (TreeItem *child : item->children()) {
+      saveFunctionList_(ts, child);
+    }
+  } else {
+    QString data = item->displayName();
+    if (!builtin.contains(data))
+      ts << data << '\\' << name2file(data) << ".cpp" << '\n';
+  }
+}
+
+void MainWindow::saveFunctionList() {
+  QString path = filesDirectory;
+  QString listpath = path + "f_list.txt";
+  QFile file(listpath);
+  if (file.open(QIODevice::WriteOnly)) {
+    QTextStream ts(&file);
+    TreeItem *root = treemodel->rootItem();
+    saveFunctionList_(ts, root);
+  }
+  file.close();
 }
 
 void MainWindow::setFunction(const QString &newFunction) {
-  qDebug() << "setFunction" << newFunction;
   if (newFunction.isEmpty()) return;
   if (newFunction == currFunction) {
     if (codeHasChanged) { // and has been saved... (autosave, TODO)
@@ -500,7 +798,8 @@ void MainWindow::setFunction(const QString &newFunction) {
 
 bool MainWindow::saveCode(const QString &name, const QString &code) {
   QString home = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-  QString path = home + "/Library/Application Support/It/" + name2file(name) + ".cpp";
+  //QString path = home + "/Library/Application Support/It/" + name2file(name) + ".cpp";
+  QString path = filesDirectory + name2file(name) + ".cpp";
   QFile file(path);
   if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QTextStream stream(&file);
@@ -517,10 +816,16 @@ bool MainWindow::saveCode(const QString &name, const QString &code) {
 bool MainWindow::compileAndLoad(const QString &fname) {
   qDebug() << "compileAndLoad" << fname; // pass fname2file(fname)
   // TODO: directories on other platforms
+#if 0
   QString home = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
   QString file = home + "/Library/Application Support/It/" + fname + ".cpp";
   QString lib = home + "/Library/Application Support/It/build/" + fname + ".dylib";
   QString comp = home + "/Code/it3/compile_macos.sh";
+#else
+  QString file = filesDirectory + fname + ".cpp";
+  QString lib = filesDirectory + "build/" + fname + ".dylib";
+  QString comp = QApplication::applicationDirPath() + "/../Resources/compile_macos.sh";
+#endif
   QFileInfo fileinfo(file);
   QFileInfo libinfo(lib);
   codeHasChanged = false;
@@ -541,8 +846,9 @@ bool MainWindow::compileAndLoad(const QString &fname) {
   if (!libinfo.exists() || fileinfo.lastModified() > libinfo.lastModified()) { // must compile, TODO: older than our own executable
     QProcess proc;
     QStringList args;
-    args << comp << fname;
-    qDebug() << "bash" << args;
+    QString exe = QApplication::applicationDirPath() + "/It";
+    args << comp << fname << filesDirectory << exe;
+    qDebug() << "Will run: bash" << args;
     proc.start("bash", args);
     proc.waitForFinished();
     exitCode = proc.exitCode();
@@ -564,8 +870,9 @@ bool MainWindow::compileAndLoad(const QString &fname) {
     return true;
   } else {
     codeHasErrors = true;
-    qDebug() << "Could not compile" << exitCode;
-    QString errs = home + "/Library/Application Support/It/build/errors.txt";
+    qDebug() << "Could not compile, code:" << exitCode;
+    //QString errs = home + "/Library/Application Support/It/build/errors.txt";
+    QString errs = filesDirectory + "build/errors.txt";
     QStringList errors;
     QFile errsfile(errs);
     if (errsfile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -576,6 +883,23 @@ bool MainWindow::compileAndLoad(const QString &fname) {
     }
     return false;
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Help
+
+void MainWindow::on_actionCheat_Sheet_triggered() {
+  QMessageBox::information(this, "Cheat Sheet",
+    "Mouse Actions:<br/><ul>"
+      "<li>Left drag: set selection</li>"
+      "<li>Left click inside selection: move selection</li>"
+      "<li>Left click outside selection: clear selection</li>"
+      "<li>Mouse wheel down: zoom in (click to reset)</li>"
+      "<li>Shift-left-drag: thumbnail (in parameter space only)</li>"
+      "<li>Alt-left-drag: draw </li>"
+      "<li>1-9: set orbit length</li>"
+      "<li>0: reset orbit</li>"
+    "</ul>");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

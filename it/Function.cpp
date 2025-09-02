@@ -30,6 +30,7 @@ Function::Function(String name, String label, int _pspace) {
   defymin = 0.0; defymax = 1.0;
   pspace = _pspace;
   iscopy = false;
+  doDebug = false;
 }
 
 Function *Function::copy_() {
@@ -48,6 +49,7 @@ Function *Function::copyArgsFrom(Function *f) {
   doannotate = f->doannotate;
   pspace = f->pspace;
   state = f->state;
+  doDebug = f->doDebug;
   // assert args.count() == f->args.count()
   for (int i = 0; i < f->args.count(); i++) {
     ItArg *arg = f->args.getArgAt(i);
@@ -104,7 +106,15 @@ void Function::setDefaultRangeDynamicalSpace(double x, double xm, double y, doub
     defymin = y;
     defymax = ym;
   }
- }
+}
+
+void Function::setMaxDebug(int limit) {
+  state->setMaxDebug(limit);
+}
+void Function::start(bool debug_enabled) {
+  doDebug = debug_enabled;
+  state->start();
+}
 
 double Function::rgb(int r, int g, int b) {
   union { double d; uint64_t i; } u;

@@ -7,13 +7,14 @@
 #include <QRunnable>
 #include <QTimer>
 #include <QElapsedTimer>
-#include <QMutex>
+
 #include "Function.h"
 #include "Colormap.h"
 #include "State.h"
 #include <atomic>
 
 class Tile;
+class QPrinter;
 
 class ItView : public QWidget {
   Q_OBJECT
@@ -28,6 +29,7 @@ public slots:
   void onRenderFinished();
 
 protected:
+  void drawContent(QPainter &painter, const QRect &targetRect);
   void paintEvent(QPaintEvent *event) override;
   void mousePressEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
@@ -38,6 +40,7 @@ public:
   bool sandbox;
   int thumbsize;
   bool singlethreaded;
+  bool debug;
 public:
   void clear();
   void startRender(Function *function, State *state, Colormap *colormap);
@@ -52,6 +55,13 @@ public:
   QPoint seldiff;
   int selecting;
   int cores;
+public:
+  void exportToPNG();
+  void exportToSVG();
+  void exportToPDF();
+  void print();
+  void printPreview();
+  void printContent(QPrinter *printer);
 private:
   std::atomic<bool> rendering;
   std::atomic<int> pendingPixels;

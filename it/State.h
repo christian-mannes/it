@@ -16,7 +16,9 @@
 
 #pragma once
 #include <string>
+#include <vector>
 #include <unordered_map>
+#include <mutex>
 
 // SETPIXEL(x, y, color) -- set a pixel corresponding to real coordinates x, y
 // SETPIXEL_(x, y, color) -- set a pixel in image coordinates (0, 0) is lower left
@@ -98,6 +100,15 @@ private:
   double *pix;            /* cached pixels: raw values as returned from iterate */
   bool *pixset;           /* remember if a pixel is set */
   int *mapped;            // tmp
+public:
+  void start();
+  void setMaxDebug(int limit);
+  void _debug(const std::string &str, bool newline);
+  std::vector<std::string> debugLines;
+private:
+  int maxDebug;           // max lines in debug
+  bool debugnl;
+  std::mutex debugmutex;
 };
 
 /******************************** EOF ***********************************/

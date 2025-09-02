@@ -1,0 +1,62 @@
+CLASS(MyFunction, "My Function") { public:
+  // Declare your parameters here
+  complex C;
+  int depth;
+  double escape;
+
+MyFunction(String name, String label, int pspace) : Function(name, label, pspace) {
+  // List every parameter you want to appear in the "parameters" section using
+  // PARAM(variable, name, type, default-value-parameters-space, default-value-dynamical-space)
+  PARAM(C, "C", complex, complex(0, 0), complex(-1,0));
+  PARAM(depth, "depth", int, 150, 150);
+  PARAM(escape, "escape", double, 1000, 1000);
+  // Set the default range for both spaces
+  setDefaultRangeParameterSpace(-2.2, 1.4, -1.8, 1.8);
+  setDefaultRangeDynamicalSpace(-2, 2, -2, 2);
+}
+
+// Define a copy function only if your code is not thread-safe
+//Function *copy() {
+//  MyFunction *f = new MyFunction(name, "", pspace);
+//  return f->copyArgsFrom(this);
+//}
+
+// Main function: given coordinates (x, y), return a value 0.0 .. 1.0
+double iterate_(double x, double y) {
+  int i;
+  complex z, c;
+  if (PARAMETER_SPACE) {
+    z = complex(0, 0);
+    c.set(x, y);
+  } else {
+    z = complex(x, y);
+    c = C;
+  }
+  for (i = 0; i < depth; i++) {
+    z = z * z + c;
+    if (norm(z) > escape * escape) break;
+  }
+  return (double)i/depth;
+}
+
+// Forward orbit: assign f(x) to x
+void orbit(complex &x) {
+  x = x * x + C;
+}
+
+// Set the parameter in dynamical space
+void setParameter(double x, double y) {
+  C.set(x, y);
+}
+
+// Experimental or additional code
+void sandbox() {
+  // Draws the orbit of the critical point
+  complex z = 0, c = C;
+  int i;
+  for (i = 0; i < depth; i++) {
+    z = z * z + c;
+    SETPIXEL(z.real(), z.imag(), 100);
+  }
+}
+};

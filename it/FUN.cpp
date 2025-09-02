@@ -48,6 +48,8 @@ byte iterate(double x, double y) {
   //int xx = (int)(255 * i / depth);
   //return RGB(xx, xx, xx);
 
+  debug("%d %d", i, depth);
+
   return (byte)(i * 255 / depth);
 }
 

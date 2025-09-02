@@ -15,8 +15,10 @@
 *************************************************************************/
 #pragma once
 #include "Args.h"
+#include "State.h"
 #include "MTRandom.h"
 #include "MTComplex.h"
+#include "debug.h"
 #include <vector>
 #define String std::string
 /**************************** Macros ************************************/
@@ -78,7 +80,6 @@ public:
   }
 };
 
-class State;
 typedef unsigned char byte;
 
 class Function {
@@ -94,6 +95,7 @@ public:
   void setDefaultRange(double x, double xm, double y, double ym);
   void setDefaultRangeParameterSpace(double x, double xm, double y, double ym);
   void setDefaultRangeDynamicalSpace(double x, double xm, double y, double ym);
+  void start(bool debug); // called before rendering, init debugging
   /* 
    * These can/must be overridden by subclasses 
    */
@@ -152,6 +154,34 @@ public:
   State *state;       // current state (do NOT touch this)
   std::vector<Annotation *> annotations; // should be in state?
   void AddAnnotation(const char *fun, double rc, double x0, double x1, double x2, double x3, const char *str = 0);
+protected:
+  bool doDebug;
+  void setMaxDebug(int limit);
+
+  template <typename... Args>
+  std::string fmt(const char *format, const Args&... args) {
+    Arg arg_array[] = {args...};
+    return _fmt(format, arg_array, sizeof...(Args));
+  }
+
+  template <typename... Args>
+  void debug(const char *format, const Args&... args) {
+    if (!doDebug) return;
+    Arg arg_array[] = {args...};
+    std::string str = _fmt(format, arg_array, sizeof...(Args));
+    state->_debug(str, true);
+  }
+
+  template <typename... Args>
+  void debugn(const char *format, const Args&... args) {
+    if (!doDebug) return;
+    Arg arg_array[] = {args...};
+    std::string str = _fmt(format, arg_array, sizeof...(Args));
+    state->_debug(str, false);
+  }
+  template <typename... Args>
+  void noprint(const char *format, const Args&... args) {
+  }
 };
 
 Function *createBuiltinFunction(const std::string &name);
