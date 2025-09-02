@@ -14,5 +14,14 @@
         <file>icons/light/x-octagon.svg</file>
         <file>icons/light/zoom-in.svg</file>
         <file>icons/light/zoom-out.svg</file>
+        <file>icons/dark/arrow-back-circle.svg</file>
+        <file>icons/dark/book.svg</file>
+        <file>icons/dark/caret-forward-circle.svg</file>
+        <file>icons/dark/close-circle.svg</file>
+        <file>icons/dark/folder.svg</file>
+        <file>icons/dark/hammer.svg</file>
+        <file>icons/dark/help-circle.svg</file>
+        <file>icons/dark/pencil.svg</file>
+        <file>icons/dark/image.svg</file>
     </qresource>
 </RCC>

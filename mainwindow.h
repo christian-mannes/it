@@ -75,6 +75,8 @@ private slots:
 
   void on_thumb_slider_valueChanged(int value);
 
+  void on_actionShow_Functions_triggered();
+
 private:
   Ui::MainWindow *ui;
   void closeEvent(QCloseEvent *event) override;

@@ -57,7 +57,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="codeView">
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -244,8 +244,8 @@
           <widget class="ItView" name="itView">
            <property name="geometry">
             <rect>
-             <x>0</x>
-             <y>0</y>
+             <x>318</x>
+             <y>174</y>
              <width>100</width>
              <height>100</height>
             </rect>
@@ -936,6 +936,8 @@
     <property name="title">
      <string>View</string>
     </property>
+    <addaction name="actionShow_Functions"/>
+    <addaction name="separator"/>
     <addaction name="actionImage"/>
     <addaction name="actionCode"/>
     <addaction name="separator"/>
@@ -978,6 +980,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionShow_Functions"/>
    <addaction name="actionCompile"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
@@ -985,6 +988,8 @@
    <addaction name="separator"/>
    <addaction name="actionImage"/>
    <addaction name="actionCode"/>
+   <addaction name="separator"/>
+   <addaction name="actionCheat_Sheet"/>
    <addaction name="actionHelp"/>
   </widget>
   <action name="actionNew_Function">
@@ -1113,7 +1118,7 @@
   <action name="actionCompile">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/light/check-circle.svg</normaloff>:/icons/light/check-circle.svg</iconset>
+     <normaloff>:/icons/dark/hammer.svg</normaloff>:/icons/dark/hammer.svg</iconset>
    </property>
    <property name="text">
     <string>Compile</string>
@@ -1125,7 +1130,7 @@
   <action name="actionStart">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/light/play.svg</normaloff>:/icons/light/play.svg</iconset>
+     <normaloff>:/icons/dark/caret-forward-circle.svg</normaloff>:/icons/dark/caret-forward-circle.svg</iconset>
    </property>
    <property name="text">
     <string>Start</string>
@@ -1140,7 +1145,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/light/x-octagon.svg</normaloff>:/icons/light/x-octagon.svg</iconset>
+     <normaloff>:/icons/dark/close-circle.svg</normaloff>:/icons/dark/close-circle.svg</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -1155,7 +1160,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/light/arrow-left.svg</normaloff>:/icons/light/arrow-left.svg</iconset>
+     <normaloff>:/icons/dark/arrow-back-circle.svg</normaloff>:/icons/dark/arrow-back-circle.svg</iconset>
    </property>
    <property name="text">
     <string>Back</string>
@@ -1167,7 +1172,7 @@
   <action name="actionImage">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/light/image.svg</normaloff>:/icons/light/image.svg</iconset>
+     <normaloff>:/icons/dark/image.svg</normaloff>:/icons/dark/image.svg</iconset>
    </property>
    <property name="text">
     <string>Image</string>
@@ -1179,7 +1184,7 @@
   <action name="actionCode">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/light/edit.svg</normaloff>:/icons/light/edit.svg</iconset>
+     <normaloff>:/icons/dark/pencil.svg</normaloff>:/icons/dark/pencil.svg</iconset>
    </property>
    <property name="text">
     <string>Code</string>
@@ -1196,7 +1201,7 @@
   <action name="actionHelp">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/light/help-circle.svg</normaloff>:/icons/light/help-circle.svg</iconset>
+     <normaloff>:/icons/dark/book.svg</normaloff>:/icons/dark/book.svg</iconset>
    </property>
    <property name="text">
     <string>Manual</string>
@@ -1221,6 +1226,10 @@
    </property>
   </action>
   <action name="actionCheat_Sheet">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/dark/help-circle.svg</normaloff>:/icons/dark/help-circle.svg</iconset>
+   </property>
    <property name="text">
     <string>Cheat Sheet</string>
    </property>
@@ -1228,6 +1237,15 @@
   <action name="actionNotebook">
    <property name="text">
     <string>Notebook</string>
+   </property>
+  </action>
+  <action name="actionShow_Functions">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/dark/folder.svg</normaloff>:/icons/dark/folder.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Show Functions</string>
    </property>
   </action>
  </widget>

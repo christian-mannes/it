@@ -488,6 +488,11 @@ void MainWindow::on_actionSet_Files_Folder_triggered() {
   firstTimeUse(false);
 }
 
+
+void MainWindow::on_actionShow_Functions_triggered() {
+  ui->treeView->setHidden(!ui->treeView->isHidden());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::on_actionCompile_triggered() {
@@ -547,6 +552,7 @@ void MainWindow::on_actionStart_triggered() {
   ui->actionStop->setEnabled(false);
   ui->debugView->hide();
 }
+
 
 void MainWindow::on_thumb_slider_actionTriggered(int action) {
   ui->itView->thumbsize = ui->thumb_slider->value();

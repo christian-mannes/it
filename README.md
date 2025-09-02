@@ -56,14 +56,11 @@ https://ionic.io/ionicons
 - [X] Settings; files directory: platform-dependent - choosable
 - [X] Notebook integration
 - [X] Function tree manipulation
-
-- [ ] Collapsible treeview with button to open it
+- [X] Dark mode
+- [X] Collapsible treeview with button to open it
 
 - [ ] Annotations: function vs temporary (orbit, Clear from index)
-- [ ] Add your own colormap
-- [ ] Make thumbnails size snap (like image size)
-- [ ] Reset to defaults
-- [ ] Customize appearance treeview/branch 
+
 
 - [X] MacOS packaging/signing/DMG
 - [ ] Windows version
@@ -90,11 +87,13 @@ https://ionic.io/ionicons
     - [ ] Mention minimum version 11 (Big Sur)
     - [X] Cheatsheet
     
-- [ ] Dark mode
+- [ ] Dark mode icons
 
 - [ ] Check all of Nuria's files
 - [ ] Get better colormaps (3D effect?)
 - [ ] A few built-in functions
+- [ ] Add your own colormap
+- [ ] Customize appearance treeview/branch 
 
 ---Ideas-----------------------------------------------------------------------
 - [ ] Compute servers (other copies)
