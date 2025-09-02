@@ -23,7 +23,7 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
-  MainWindow(QWidget *parent = nullptr);
+  MainWindow(bool dark, QWidget *parent = nullptr);
   ~MainWindow();
   void postInit();
 

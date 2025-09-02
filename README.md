@@ -58,9 +58,10 @@ https://ionic.io/ionicons
 - [X] Function tree manipulation
 - [X] Dark mode
 - [X] Collapsible treeview with button to open it
+- [X] Help page and cheat sheet
 
 - [ ] Annotations: function vs temporary (orbit, Clear from index)
-
+- [ ] Back button does back in web view
 
 - [X] MacOS packaging/signing/DMG
 - [ ] Windows version
@@ -68,32 +69,25 @@ https://ionic.io/ionicons
 
 - [ ] Github (gitlab/gitea/codeberg)
     - [ ] Proper readme / introduction
-    - [ ] Include manual
-    - [ ] kurisuchan444 on github
-    - [ ] App store?
-    - [ ] Promote with Qt
-
-- [X] Help page 
-- [ ] ? is cheat sheet, book is manual
-- [ ] Back button does back in web view
-- [ ] Help
-    - [ ] About menu (prepared, see Claude)
-    - [ ] Explain how to get a compiler
-    - [ ] Add how to debug
-    - [ ] Manual: local web page
-    - [ ] Help: Show cheatsheet from help
-    - [ ] Help: Show long help as web page (integrated)
-    - [ ] Add "what's new": continuous colormaps
-    - [ ] Mention minimum version 11 (Big Sur)
-    - [X] Cheatsheet
-    
-- [ ] Dark mode icons
+    - [ ] Include manual / web page
+    - [ ] App store? 
+    - [ ] Qt showcase?
 
 - [ ] Check all of Nuria's files
 - [ ] Get better colormaps (3D effect?)
 - [ ] A few built-in functions
 - [ ] Add your own colormap
 - [ ] Customize appearance treeview/branch 
+
+---Help------------------------------------------------------------------------
+- [ ] About menu (prepared, see Claude)
+- [ ] Explain how to get a compiler
+- [ ] Add how to debug
+- [ ] Manual: local web page
+- [ ] Help: Show cheatsheet from help
+- [ ] Help: Show long help as web page (integrated)
+- [ ] Add "what's new": continuous colormaps
+- [ ] Mention minimum version 11 (Big Sur)
 
 ---Ideas-----------------------------------------------------------------------
 - [ ] Compute servers (other copies)

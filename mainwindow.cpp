@@ -45,7 +45,7 @@ QString name2file(const QString &name) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   mainWindow = this;
   ui->setupUi(this);
   function = nullptr;
@@ -111,6 +111,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->debugView->hide();
   exportDirectory = QDir::homePath();
   doSaveSettings = true;
+
+  if (darkMode) {
+    ui->actionCompile->setIcon(QIcon(":/icons/dark/hammer-outline.svg"));
+    ui->actionStart->setIcon(QIcon(":/icons/dark/arrow-forward-circle-outline.svg"));
+    ui->actionStop->setIcon(QIcon(":/icons/dark/close-circle-outline.svg"));
+    ui->actionBack->setIcon(QIcon(":/icons/dark/arrow-back-circle-outline.svg"));
+    ui->actionImage->setIcon(QIcon(":/icons/dark/image-outline.svg"));
+    ui->actionCode->setIcon(QIcon(":/icons/dark/pencil-outline.svg"));
+    ui->actionHelp->setIcon(QIcon(":/icons/dark/book-outline.svg"));
+    ui->actionCheat_Sheet->setIcon(QIcon(":/icons/dark/help-circle-outline.svg"));
+    ui->actionShow_Functions->setIcon(QIcon(":/icons/dark/folder-outline.svg"));
+  }
 
   QTimer::singleShot(0, this, [this]() { // post-ui
     postInit();

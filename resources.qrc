@@ -1,19 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/light/arrow-left.svg</file>
-        <file>icons/light/arrow-right.svg</file>
-        <file>icons/light/check-circle.svg</file>
-        <file>icons/light/check.svg</file>
-        <file>icons/light/code.svg</file>
-        <file>icons/light/edit-2.svg</file>
-        <file>icons/light/edit-3.svg</file>
-        <file>icons/light/edit.svg</file>
-        <file>icons/light/help-circle.svg</file>
-        <file>icons/light/image.svg</file>
-        <file>icons/light/play.svg</file>
-        <file>icons/light/x-octagon.svg</file>
-        <file>icons/light/zoom-in.svg</file>
-        <file>icons/light/zoom-out.svg</file>
         <file>icons/dark/arrow-back-circle.svg</file>
         <file>icons/dark/book.svg</file>
         <file>icons/dark/caret-forward-circle.svg</file>
@@ -23,5 +9,25 @@
         <file>icons/dark/help-circle.svg</file>
         <file>icons/dark/pencil.svg</file>
         <file>icons/dark/image.svg</file>
+        <file>icons/dark/arrow-back-circle-outline.svg</file>
+        <file>icons/dark/book-outline.svg</file>
+        <file>icons/dark/caret-forward-circle-outline.svg</file>
+        <file>icons/dark/close-circle-outline.svg</file>
+        <file>icons/dark/folder-outline.svg</file>
+        <file>icons/dark/hammer-outline.svg</file>
+        <file>icons/dark/help-circle-outline.svg</file>
+        <file>icons/dark/image-outline.svg</file>
+        <file>icons/dark/pencil-outline.svg</file>
+        <file>icons/light/arrow-back-circle-outline.svg</file>
+        <file>icons/light/book-outline.svg</file>
+        <file>icons/light/caret-forward-circle-outline.svg</file>
+        <file>icons/light/close-circle-outline.svg</file>
+        <file>icons/light/folder-outline.svg</file>
+        <file>icons/light/hammer-outline.svg</file>
+        <file>icons/light/help-circle-outline.svg</file>
+        <file>icons/light/image-outline.svg</file>
+        <file>icons/light/pencil-outline.svg</file>
+        <file>icons/light/arrow-forward-circle-outline.svg</file>
+        <file>icons/dark/arrow-forward-circle-outline.svg</file>
     </qresource>
 </RCC>

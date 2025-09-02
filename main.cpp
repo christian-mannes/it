@@ -53,8 +53,11 @@ int main(int argc, char *argv[]) {
     darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
     darkPalette.setColor(QPalette::HighlightedText, Qt::black);
     a.setPalette(darkPalette);
+
+
+
   }
-  MainWindow w;
+  MainWindow w(isDarkMode);
   w.show();
   return a.exec();
 }
