@@ -57,7 +57,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="codeView">
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1240,6 +1240,9 @@
    </property>
   </action>
   <action name="actionShow_Functions">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/icons/light/folder-outline.svg</normaloff>:/icons/light/folder-outline.svg</iconset>

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(It VERSION 3.0 LANGUAGES CXX)
+project(It VERSION 3.0.1 LANGUAGES CXX)
 
 if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64") # Fat binaries
@@ -19,6 +19,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(QT_DEBUG_FIND_PACKAGE ON)
 #set(CMAKE_CXX_FLAGS -H)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAPP_VERSION=\"${PROJECT_VERSION}\"")
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets PrintSupport Svg)
 find_package(Qt6 REQUIRED COMPONENTS WebEngineWidgets)
@@ -52,7 +53,7 @@ qt_add_executable(It
     it/Colormap.h it/Colormap.cpp
     it/Algo.h it/Algo.cpp
     it/FUN.cpp
-    README.md
+    TODO.md
     paramsmodel.h paramsmodel.cpp
 
     colormappreview.h colormappreview.cpp
@@ -63,6 +64,7 @@ qt_add_executable(It
     jupyter.h jupyter.cpp
     template.txt
     tree.h tree.cpp
+    README.md
 
 )
 

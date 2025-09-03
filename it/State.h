@@ -28,7 +28,7 @@
 // VLINE(x, y, dy, col) -- draw a line from x, y to x, y+dy
 // HLINE_(x, y, dx, col) -- draw a line from point x, y to x+dx, y (image coordinates)
 // VLINE_(x, y, dy, col) -- draw a line from x, y to x, y+dy (image coordinates)
-#define SETPIXEL(X, Y, C) state->setPixel(state->invX(X), state->invY(Y), (C))
+#define SETPIXEL(X, Y, C) state->setPixel(state->invX(X), state->invY(Y), (double)(C), true)
 #define GETPIXEL(X, Y) state->getPixel(state->invX(X), state->invY(Y))
 #define HLINE(X, Y, DX, C) state->drawLine(state->invX(X), state->invY(Y), state->invX((X)+(DX)), state->invY(Y), (C))
 #define VLINE(X, Y, DY, C) state->drawLine(state->invX(X), state->invY(Y), state->invX(X), state->invY((Y)+(DY)), (C))
@@ -40,7 +40,7 @@
 
 class Function;
 class Colormap;
-
+class Annotation;
 typedef unsigned char byte;
 
 class State {
@@ -93,6 +93,20 @@ public:
   bool annnotate;                /* allow annotations (TODO: here?) */
   bool sandbox;                  /* run sandbox code */
   int pspace;                    // 1 for parameter space (why?)
+public:
+  std::vector<Annotation *> annotations;
+  void AddAnnotation(const char *fun, double rc, double x0, double x1, double x2, double x3, const char *str = 0);
+  void ClearAnnotations();
+  void SetStrokeColor(double r, double g, double b, double opa=255);
+  void SetFillColor(double r, double g, double b, double opa=255);
+  void SetLineWidth(double w);
+  void DrawLine(double x0, double y0, double x1, double y1, bool realcoords = true);
+  void DrawRect(double x, double y, double w, double h, bool realcoords = true);
+  void FillRect(double x, double y, double w, double h, bool realcoords = true);
+  void DrawEllipseInRect(double x, double y, double w, double h, bool realcoords = true);
+  void FillEllipseInRect(double x, double y, double w, double h, bool realcoords = true);
+  void SetFont(const char *name, double size);
+  void DrawText(const char *txt, double x, double y, bool realcoords = true);
 private:
   std::unordered_map<std::string,std::string> hash;/* hash to store all arguments */
   int width;              /* image width */

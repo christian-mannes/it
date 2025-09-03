@@ -77,6 +77,8 @@ private slots:
 
   void on_actionShow_Functions_triggered();
 
+  void on_actionAbout_triggered();
+
 private:
   Ui::MainWindow *ui;
   void closeEvent(QCloseEvent *event) override;

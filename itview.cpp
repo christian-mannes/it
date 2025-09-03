@@ -58,6 +58,35 @@ void ItView::paintEvent(QPaintEvent *event) {
   drawContent(painter, rect());
 }
 
+void ItView::drawAnnotations(QPainter &painter, const std::vector<Annotation*> &annotations) {
+  double linew = 1.0;
+  painter.setPen(QPen(QColor::fromRgbF(1, 1, 1), 2));
+  QBrush brush;
+  for (Annotation *a: annotations) {
+    if (a->f == "DrawLine") {
+      painter.drawLine(state->invX(a->p0), state->invY(a->p1), state->invX(a->p2), state->invY(a->p3));
+    } else if (a->f == "SetLineWidth") {
+      linew = a->p0;
+    } else if (a->f == "SetStrokeColor") {
+      painter.setPen(QPen(QColor((int)a->p0, (int)a->p1, (int)a->p2), linew));
+    } else if (a->f == "SetFillColor") {
+      brush = QBrush(QColor((int)a->p0, (int)a->p1, (int)a->p2));
+    } else if (a->f == "DrawRect") {
+      painter.drawRect(state->invX(a->p0), state->invY(a->p1), state->invX(a->p2), state->invY(a->p3));
+    } else if (a->f == "FillRect") {
+      painter.fillRect(QRect(state->invX(a->p0), state->invY(a->p1), state->invX(a->p2), state->invY(a->p3)), brush);
+    } else if (a->f == "DrawEllipseInRect") {
+      painter.drawEllipse(QRect(state->invX(a->p0), state->invY(a->p1), state->invX(a->p2), state->invY(a->p3)));
+    } else if (a->f == "FillEllipseInRect") {
+      // not supported
+    } else if (a->f == "SetFont") {
+      painter.setFont(QFont(QString(a->s.c_str()), a->p0));
+    } else if (a->f == "DrawText") {
+      painter.drawText(state->invX(a->p0), state->invY(a->p1), QString(a->s.c_str()));
+    }
+  }
+}
+
 void ItView::drawContent(QPainter &painter, const QRect &targetRect) {
   painter.setRenderHint(QPainter::Antialiasing);
   painter.translate(pan);
@@ -74,38 +103,14 @@ void ItView::drawContent(QPainter &painter, const QRect &targetRect) {
 
   if (rendering.load()) return;
 
-  if (function) {
-    double linew = 1.0;
-    painter.setPen(QPen(QColor::fromRgbF(1, 1, 1), 2));
-    QBrush brush;
-    for (Annotation *a: function->annotations) {
-      if (a->f == "DrawLine") {
-        painter.drawLine(state->invX(a->p0), state->invY(a->p1), state->invX(a->p2), state->invY(a->p3));
-      } else if (a->f == "SetLineWidth") {
-        linew = a->p0;
-      } else if (a->f == "SetStrokeColor") {
-        painter.setPen(QPen(QColor((int)a->p0, (int)a->p1, (int)a->p2), linew));
-      } else if (a->f == "SetFillColor") {
-        brush = QBrush(QColor((int)a->p0, (int)a->p1, (int)a->p2));
-      } else if (a->f == "DrawRect") {
-        painter.drawRect(state->invX(a->p0), state->invY(a->p1), state->invX(a->p2), state->invY(a->p3));
-      } else if (a->f == "FillRect") {
-        painter.fillRect(QRect(state->invX(a->p0), state->invY(a->p1), state->invX(a->p2), state->invY(a->p3)), brush);
-      } else if (a->f == "DrawEllipseInRect") {
-        painter.drawEllipse(QRect(state->invX(a->p0), state->invY(a->p1), state->invX(a->p2), state->invY(a->p3)));
-      } else if (a->f == "FillEllipseInRect") {
-        // not supported
-      } else if (a->f == "SetFont") {
-        painter.setFont(QFont(QString(a->s.c_str()), a->p0));
-      } else if (a->f == "DrawText") {
-        painter.drawText(state->invX(a->p0), state->invY(a->p1), QString(a->s.c_str()));
-      }
-    }
-  }
+  if (function)
+    drawAnnotations(painter, function->annotations);
+  if (state)
+    drawAnnotations(painter, state->annotations);
 
-  if (thumbnail != nullptr) {
+  if (thumbnail != nullptr)
     painter.drawImage(0, 0, *thumbnail);
-  }
+
   if (points.count() > 0) {
     int n = points.count();
     painter.setPen(QPen(QColor::fromRgbF(0.5, 1, 0.7), 2));
@@ -215,11 +220,11 @@ void ItView::addOrbit() {
   double x = state->X(mousex);
   double y = state->Y(mousey);
   complex z(x, y);
-  function->ClearAnnotations();
-  function->SetStrokeColor(255,127,255);
+  state->ClearAnnotations();
+  state->SetStrokeColor(255,127,255);
   for (int i = 0; i < orbit; i++) {
     function->orbit(z);
-    function->DrawLine(x, y, z.real(), z.imag());
+    state->DrawLine(x, y, z.real(), z.imag());
     x = z.real(); y = z.imag();
   }
   update();
@@ -246,7 +251,7 @@ void ItView::keyPressEvent(QKeyEvent *event) {
     addOrbit();
   } else {
     orbit = 0;
-    if (function) function->ClearAnnotations();
+    if (state) state->ClearAnnotations();
     update();
   }
 }
@@ -302,6 +307,7 @@ void ItView::startRender(Function *function_, State *state_, Colormap *colormap_
   elapsedTimer.start();
 
   qDebug() << "starting";
+  function->state = state;
   function->setColors();
   function->start(debug);
 
@@ -365,8 +371,8 @@ void ItView::onRenderFinished() {
   progressTimer->stop();
   //threadPool->waitForDone();
   for (Tile *tile: tiles) delete tile; tiles.clear();
-  if (sandbox) function->sandbox();
   if (annotate) function->annotate();
+  if (sandbox) function->sandbox();
   map();
   update();
   extern MainWindow *mainWindow;

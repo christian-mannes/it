@@ -67,6 +67,8 @@ MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui
   }
   ui->menuColormap->addSeparator();
 
+  ui->actionAbout->setMenuRole(QAction::AboutRole); // MacOS About menu
+
   // Params model for parameters
   paramsmodel = new ParamsModel();
   ui->paramsTableView->setModel(paramsmodel);
@@ -109,6 +111,7 @@ MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui
   });
   ui->errorsView->hide();
   ui->debugView->hide();
+  ui->actionShow_Functions->setChecked(true);
   exportDirectory = QDir::homePath();
   doSaveSettings = true;
 
@@ -502,7 +505,13 @@ void MainWindow::on_actionSet_Files_Folder_triggered() {
 
 
 void MainWindow::on_actionShow_Functions_triggered() {
-  ui->treeView->setHidden(!ui->treeView->isHidden());
+  if (ui->treeView->isHidden()) {
+    ui->treeView->setHidden(false);
+    ui->actionShow_Functions->setChecked(true);
+  } else {
+    ui->treeView->setHidden(true);
+    ui->actionShow_Functions->setChecked(false);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -522,7 +531,7 @@ void MainWindow::on_actionStart_triggered() {
 
   double xmin, xmax, ymin, ymax;
 
-  if (!ui->itView->selection.isEmpty()) { // auto-zoom
+  if (state != nullptr && !ui->itView->selection.isEmpty()) { // auto-zoom
     QRect &sel = ui->itView->selection;
     xmin = state->X(sel.x());
     xmax = state->X(sel.x() + sel.width());
@@ -565,7 +574,6 @@ void MainWindow::on_actionStart_triggered() {
   ui->debugView->hide();
 }
 
-
 void MainWindow::on_thumb_slider_actionTriggered(int action) {
   ui->itView->thumbsize = ui->thumb_slider->value();
 }
@@ -592,25 +600,29 @@ void MainWindow::on_renderFinish() {
 }
 
 void MainWindow::on_actionBack_triggered() {
-  ui->stackedWidget->setCurrentIndex(IMAGE_TAB);
-  if (history.size() > 0) {
-    if (state != nullptr) delete state;
-    state = history.back();
-    history.pop_back();
-    ui->itView->restore(function, state, colormap);
-    ui->xmin_le->setText(QString::number(state->xmin));
-    ui->xmax_le->setText(QString::number(state->xmax));
-    ui->ymin_le->setText(QString::number(state->ymin));
-    ui->ymax_le->setText(QString::number(state->ymax));
-    ui->resolution_xres->setText(QString::number(state->xres));
-    ui->resolution_yres->setText(QString::number(state->yres));
-    ui->pspace_radio->setChecked(state->pspace == 1); // set other?
+  if (ui->stackedWidget->currentIndex() == HELP_TAB) {
+    ui->helpView->triggerPageAction(QWebEnginePage::Back);
+  } else {
+    ui->stackedWidget->setCurrentIndex(IMAGE_TAB);
+    if (history.size() > 0) {
+      if (state != nullptr) delete state;
+      state = history.back();
+      history.pop_back();
+      ui->itView->restore(function, state, colormap);
+      ui->xmin_le->setText(QString::number(state->xmin));
+      ui->xmax_le->setText(QString::number(state->xmax));
+      ui->ymin_le->setText(QString::number(state->ymin));
+      ui->ymax_le->setText(QString::number(state->ymax));
+      ui->resolution_xres->setText(QString::number(state->xres));
+      ui->resolution_yres->setText(QString::number(state->yres));
+      ui->pspace_radio->setChecked(state->pspace == 1); // set other?
 
-    state->restoreArgs(function);
-    paramsmodel->setFunction(function);
-    ui->paramsTableView->show();
+      state->restoreArgs(function);
+      paramsmodel->setFunction(function);
+      ui->paramsTableView->show();
+    }
+    ui->actionBack->setEnabled(history.size() > 0);
   }
-  ui->actionBack->setEnabled(history.size() > 0);
 }
 
 void MainWindow::on_slider_res_valueChanged(int value) {
@@ -708,11 +720,11 @@ TreeModel *MainWindow::initFunctionList() {
         QString name = pieces[0];
         QString file = pieces[1];
         if (file.endsWith(".cpp")) file = file.mid(0, file.length() - 4);
-        if (file != name2file(name)) { // old style entry - rename file
+        if (file != name2file(name)) { // old style entry - copy file
           QString oldpath = path + file + ".cpp";
           QString newpath = path + name2file(name) + ".cpp";
           if (!QFile::exists(newpath)) {
-            if (!QFile::rename(oldpath, newpath)) {
+            if (!QFile::copy(oldpath, newpath)) {
               qDebug() << "Renamed" << oldpath << "to" << newpath;
             } else {
               qDebug() << "Renamed" << oldpath << "to" << newpath;
@@ -842,10 +854,12 @@ bool MainWindow::compileAndLoad(const QString &fname) {
 #else
   QString file = filesDirectory + fname + ".cpp";
   QString lib = filesDirectory + "build/" + fname + ".dylib";
+  QString exe = QApplication::applicationDirPath() + "/It";
   QString comp = QApplication::applicationDirPath() + "/../Resources/compile_macos.sh";
 #endif
   QFileInfo fileinfo(file);
   QFileInfo libinfo(lib);
+  QFileInfo exeinfo(exe);
   codeHasChanged = false;
   codeHasErrors = false;
   if (fileinfo.exists()) {
@@ -861,7 +875,7 @@ bool MainWindow::compileAndLoad(const QString &fname) {
     return false;
   }
   int exitCode = 0;
-  if (!libinfo.exists() || fileinfo.lastModified() > libinfo.lastModified()) { // must compile, TODO: older than our own executable
+  if (!libinfo.exists() || fileinfo.lastModified() > libinfo.lastModified() || exeinfo.lastModified() > libinfo.lastModified()) { // must compile, TODO: older than our own executable
     QProcess proc;
     QStringList args;
     QString exe = QApplication::applicationDirPath() + "/It";
@@ -918,6 +932,23 @@ void MainWindow::on_actionCheat_Sheet_triggered() {
       "<li>1-9: set orbit length</li>"
       "<li>0: reset orbit</li>"
     "</ul>");
+}
+
+#define xstr(a) str(a)
+#define str(a) #a
+
+void MainWindow::on_actionAbout_triggered() {
+  QMessageBox::information(this, "About It",
+    QString(
+      "<h1>It</h1>"
+      "<p>Version: %1</p>"
+      "<h3>Design:</h3>"
+      "<p>&nbsp;&nbsp;&nbsp;Christian Mannes, Núria Fagella</p>"
+      "<h3>Development:</h3>"
+      "<p>&nbsp;&nbsp;&nbsp;Christian Mannes</p>"
+      "<h3>Web Page:</h3>"
+      "<p>&nbsp;&nbsp;&nbsp;https://www.mannes-tech.com/It/</p>"
+      "<p><i>Copyright (c) 1998-2025 Mannes Technology. All rights reserved</i></p>").arg(xstr(APP_VERSION)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

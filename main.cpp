@@ -36,7 +36,6 @@ int main(int argc, char *argv[]) {
 
   bool isDarkMode = a.styleHints()->colorScheme() == Qt::ColorScheme::Dark;
   if (isDarkMode) {
-    // Apply dark theme
     a.setStyle("Fusion");
     QPalette darkPalette;
     darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
@@ -53,9 +52,6 @@ int main(int argc, char *argv[]) {
     darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
     darkPalette.setColor(QPalette::HighlightedText, Qt::black);
     a.setPalette(darkPalette);
-
-
-
   }
   MainWindow w(isDarkMode);
   w.show();

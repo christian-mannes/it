@@ -29,6 +29,7 @@ public slots:
   void onRenderFinished();
 
 protected:
+  void drawAnnotations(QPainter &painter, const std::vector<Annotation*> &annotations);
   void drawContent(QPainter &painter, const QRect &targetRect);
   void paintEvent(QPaintEvent *event) override;
   void mousePressEvent(QMouseEvent *event) override;

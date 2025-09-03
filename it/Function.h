@@ -152,7 +152,7 @@ public:
   void DrawText(const char *txt, double x, double y, bool realcoords = true);
 public:
   State *state;       // current state (do NOT touch this)
-  std::vector<Annotation *> annotations; // should be in state?
+  std::vector<Annotation *> annotations;
   void AddAnnotation(const char *fun, double rc, double x0, double x1, double x2, double x3, const char *str = 0);
 protected:
   bool doDebug;

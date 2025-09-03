@@ -7,12 +7,11 @@
 DIR=${2:-${HOME}/Library/Application\ Support/It/}
 EXE=${3:-${HOME}/Code/it3/build/Qt_6_9_2_for_macOS-Debug/It.app/Contents/MacOS/It}
 
-FILE="${DIR}/$1"
 ARCH=`uname -m` # arm64 or x86_64
 COMPILER=`which c++`
 LINKER=${COMPILER}
-CPPFLAGS="-std=gnu++17 -arch ${ARCH}"
-IFLAGS="-I${DIR}/it"
+CPPFLAGS="-std=gnu++17 -arch ${ARCH} -g"
+IFLAGS="-I../it"
 #LFLAGS="-L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib -stdlib=libc++ -arch x86_64 -dynamiclib -L. -F. -w"
 LFLAGS="-stdlib=libc++ -arch ${ARCH} -dynamiclib -L. -F."
 
@@ -62,8 +61,8 @@ cat <<PREFIX > prefix.txt
 PREFIX
 fi
 
-if [ ! -a "$1.dylib" -o "${FILE}.cpp" -nt "$1.dylib" ]; then
-  cat prefix.txt "${FILE}.cpp" > ITFUN.cpp
+if [ ! -a "$1.dylib" -o "../$1.cpp" -nt "$1.dylib" ]; then
+  cat prefix.txt "../$1.cpp" > ITFUN.cpp
   CLASSNAME=`grep -o 'CLASS([^,]*' ITFUN.cpp | sed s/CLASS\(//`
   POSTFIX="extern \"C\" void *_createFunction(int pspace) { return new ${CLASSNAME}(\"${CLASSNAME}\", \"label\", pspace); }"
   echo $POSTFIX >> ITFUN.cpp

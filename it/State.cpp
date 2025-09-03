@@ -33,6 +33,7 @@ State::State(Function *function, Colormap *colormap, int w, int h) {
   this->function = function;
   this->colormap = colormap;
   pix = nullptr;
+  pixset = nullptr;
   width = height = 0;
   selx = sely = selX = selY = 0;
   xres = yres = 0;
@@ -48,9 +49,11 @@ State::~State() {
 void State::clear() {
   int n = width * height;
   selx = sely = selX = selY = 0;
-  for (int i = 0; i < n; i++) {
-    pix[i] = 0;
-    pixset[i] = false;
+  if (pix) {
+    for (int i = 0; i < n; i++) {
+      pix[i] = 0;
+      pixset[i] = false;
+    }
   }
 }
 
@@ -231,6 +234,49 @@ void State::_debug(const std::string &str, bool newline) {
     debugLines.push_back("*** Too many debug messages. Try setMaxDebug(limit) with a higher value in your constructor. ***");
   }
 }
+
+/////////////////////////// Drawing functions ////////////////////////////
+
+void State::ClearAnnotations() {
+  for (Annotation *a: annotations) delete a;
+  annotations.clear();
+}
+void State::AddAnnotation(const char *fun, double rc, double x0, double x1, double x2, double x3, const char *str) {
+  annotations.push_back(new Annotation(fun, rc, x0, x1, x2, x3, str));
+}
+
+void State::SetStrokeColor(double r, double g, double b, double opa) {
+  AddAnnotation("SetStrokeColor", false, r, g, b, opa);
+}
+void State::SetFillColor(double r, double g, double b, double opa) {
+  AddAnnotation("SetFillColor", false, r, g, b, opa);
+}
+void State::SetLineWidth(double w) {
+  AddAnnotation("SetLineWidth", false, w, 0, 0, 0);
+}
+void State::DrawLine(double x0, double y0, double x1, double y1, bool realcoords) {
+  AddAnnotation("DrawLine", realcoords, x0, y0, x1, y1);
+}
+void State::DrawRect(double x, double y, double w, double h, bool realcoords) {
+  AddAnnotation("DrawRect", realcoords, x, y, w, h);
+}
+void State::FillRect(double x, double y, double w, double h, bool realcoords) {
+  AddAnnotation("FillRect", realcoords, x, y, w, h);
+}
+void State::DrawEllipseInRect(double x, double y, double w, double h, bool realcoords) {
+  AddAnnotation("DrawEllipseInRect", realcoords, x, y, w, h);
+}
+void State::FillEllipseInRect(double x, double y, double w, double h, bool realcoords) {
+  AddAnnotation("FillEllipseInRect", realcoords, x, y, w, h);
+}
+void State::SetFont(const char *name, double size) {
+  AddAnnotation("SetFont", false, size, 0, 0, 0, name);
+}
+void State::DrawText(const char *txt, double x, double y, bool realcoords) {
+  AddAnnotation("DrawText", realcoords, x, y, 0, 0, txt);
+}
+
+/******************************** EOF ***********************************/
 
 #if 0
 #define FORM_FEED 12
