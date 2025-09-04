@@ -1,16 +1,14 @@
 #!/bin/bash
-
-DIR=~/Code/it3/build/Qt_6_9_2_for_macOS-Release
-PROJ_DIR=~/Code/it3
+#
+# Must run in main directory
+# Build release before running.
+#
+# Must set (environment or shell): IT_SIGNING_IDENTITY
+# IT_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAM_ID)"
+DIR=build/Qt_6_9_2_for_macOS-Release
 APP_NAME="It"
-BUNDLE_ID="com.mannestech.it3"
-SIGNING_IDENTITY="Developer ID Application: Christian Mannes (6CL5P9A99V)"
-APPLE_ID="christ@mannes-tech.com"
-TEAM_ID="6CL5P9A99V"
-APP_PASSWORD="cuun-rvvf-rfrz-lzyw"
 MACDEPLOY=/Users/christ/Qt/6.9.2/macos/bin/macdeployqt6
 
-cd "$PROJ_DIR"
 rm -f it.zip
 zip -r it.zip it
 mv it.zip "$DIR/It.app/Contents/Resources"
@@ -34,15 +32,15 @@ codesign --remove-signature It.app 2>/dev/null || true
 
 find It.app -name "*.framework" -type d | while read framework; do
     codesign --force --verify --verbose --timestamp --options runtime \
-        --sign "${SIGNING_IDENTITY}" "$framework"
+        --sign "${IT_SIGNING_IDENTITY}" "$framework"
 done
 
 find It.app/Contents/PlugIns -name "*.dylib" -exec codesign \
-    --force --sign "${SIGNING_IDENTITY}" {} \;
+    --force --sign "${IT_SIGNING_IDENTITY}" {} \;
 
 codesign --force --verify --verbose --timestamp --options runtime \
-    --entitlements "${PROJ_DIR}/It.entitlements" \
-    --sign "${SIGNING_IDENTITY}" It.app
+    --entitlements "It.entitlements" \
+    --sign "${IT_SIGNING_IDENTITY}" It.app
 
 codesign --verify --deep --strict It.app
 
@@ -55,7 +53,7 @@ ditto -c -k --keepParent It.app It.zip
 # Submit for notarization
 xcrun notarytool submit It.zip --keychain-profile "notarytool-password" --wait
 # If something goes wrong, paste in the UUID from the previous step and:
-#xcrun notarytool log 959c986d-38e6-414d-840a-2c2c012ff740 --keychain-profile "notarytool-password"
+#xcrun notarytool log <uuid> --keychain-profile "notarytool-password"
 
 # Staple the notarization ticket
 xcrun stapler staple It.app

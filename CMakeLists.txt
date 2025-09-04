@@ -65,7 +65,8 @@ qt_add_executable(It
     template.txt
     tree.h tree.cpp
     README.md
-
+    LICENSE.md
+    deploy.sh
 )
 
 file(GLOB_RECURSE IT_SOURCES "${CMAKE_SOURCE_DIR}/it/*")
