@@ -1,25 +1,4 @@
-# Icons
-We are using https://feathericons.com/ (Alternatives: search for "popular modern svg icon pack")
-Icon files are of the form:
-```svg
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-activity"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-```
-Before saving, you should replace "currentColor" with #E0E0E0 for dark mode and #424242 for light mode.
-You can also change stroke-width and size (replacing all occurrences of 24).
-It icons are 32x32, which is slightly too large. Standard is 24.
-
-https://ionic.io/ionicons
-    build: hammer
-    run: caret-forward-circle
-    stop: close-circle
-    back: arrow-back-circle, chevron-back-circle
-    image: image
-    code: code or code-slash or pencil
-    help: help-circle
-    manual: book
-    add: add-circle
-    
--------------------------------------------------------------------------------
+2025-08-10
 - [X] Center image when smaller than 
 - [X] Compat: iterate/iterate_
 - [X] Return RGB(r, g, b)
@@ -60,11 +39,10 @@ https://ionic.io/ionicons
 - [X] Collapsible treeview with button to open it
 - [X] Help page and cheat sheet
 - [X] Annotations: function vs temporary (orbit, Clear from index)
+- [X] Randomize colors (R -> drawing colors)
 
-- [ ] Warn if no compiler is found
-- [ ] Randomize colors (R -> drawing colors)
 - [ ] Put when to compile in code, compile unconditionally
-- [ ] Better run icon, maybe rocket-outline
+- [ ] Warn if no compiler is found
 - [ ] Bookmark places (complete param set)
 
 - [X] MacOS packaging/signing/DMG
@@ -149,8 +127,21 @@ Newtiles: 100 (10000 pix/ms)
     32x32       110
     16x16       170
 -------------------------------------------------------------------------------
+play-outline
+close-outline
+arrow-back-outline
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
+# Icons
+https://ionic.io/ionicons (Alternatives: search for "popular modern svg icon pack")
+Icon files are of the form:
+```svg
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-activity"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+```
+Before saving, you should replace "currentColor" with #E0E0E0 for dark mode and #424242 for light mode.
+You can also change stroke-width and size (replacing all occurrences of 24).
+It icons are 32x32, which is slightly too large. Standard is 24.
+
 ### TreeView usage
 ```c++
 #include "HierarchicalTreeView.h"

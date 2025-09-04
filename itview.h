@@ -85,6 +85,10 @@ private:
   QList<QPoint> points;
   QList<Tile*> tiles;
   void map();
+  QColor selectionColor;
+  QColor orbitColor;
+  QColor drawColor;
+  void randomizeColors();
 };
 
 #endif // ITVIEW_H

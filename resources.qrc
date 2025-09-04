@@ -29,5 +29,11 @@
         <file>icons/light/pencil-outline.svg</file>
         <file>icons/light/arrow-forward-circle-outline.svg</file>
         <file>icons/dark/arrow-forward-circle-outline.svg</file>
+        <file>icons/light/arrow-back-outline.svg</file>
+        <file>icons/light/close-outline.svg</file>
+        <file>icons/light/play-outline.svg</file>
+        <file>icons/dark/arrow-back-outline.svg</file>
+        <file>icons/dark/close-outline.svg</file>
+        <file>icons/dark/play-outline.svg</file>
     </qresource>
 </RCC>

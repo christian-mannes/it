@@ -11,6 +11,7 @@
 #include <QPrintPreviewDialog>
 #include <QtSvg/QSvgGenerator>
 #include <QPrinter>
+#include <QRandomGenerator>
 
 #include "itview.h"
 #include "mainwindow.h"
@@ -36,6 +37,9 @@ ItView::ItView(QWidget *parent) : QWidget{parent} {
   connect(this, &ItView::renderFinished, this, &ItView::onRenderFinished);
   setMouseTracking(true);
   orbit = 0;
+  selectionColor = QColor::fromRgbF(0, 1, 0);
+  orbitColor = QColor::fromRgbF(0.5, 1, 0.7);
+  drawColor = QColor::fromRgbF(0.5, 0.6, 0.2);
 }
 
 ItView::~ItView() {
@@ -87,6 +91,13 @@ void ItView::drawAnnotations(QPainter &painter, const std::vector<Annotation*> &
   }
 }
 
+void ItView::randomizeColors() {
+  QRandomGenerator *g = QRandomGenerator::global();
+  selectionColor = QColor(g->bounded(256), g->bounded(256), g->bounded(256));
+  orbitColor = QColor(g->bounded(256), g->bounded(256), g->bounded(256));
+  drawColor = QColor(g->bounded(256), g->bounded(256), g->bounded(256));
+}
+
 void ItView::drawContent(QPainter &painter, const QRect &targetRect) {
   painter.setRenderHint(QPainter::Antialiasing);
   painter.translate(pan);
@@ -97,7 +108,7 @@ void ItView::drawContent(QPainter &painter, const QRect &targetRect) {
   }
 
   if (selection.width() * selection.height() != 0) {
-    painter.setPen(QPen(QColor::fromRgbF(0, 1, 0), 2));
+    painter.setPen(QPen(selectionColor, 2));
     painter.drawRect(selection);
   }
 
@@ -113,12 +124,12 @@ void ItView::drawContent(QPainter &painter, const QRect &targetRect) {
 
   if (points.count() > 0) {
     int n = points.count();
-    painter.setPen(QPen(QColor::fromRgbF(0.5, 1, 0.7), 2));
+    painter.setPen(QPen(orbitColor, 2));
     for (int i = 1; i < n; i++) {
       painter.drawLine(points[i-1].x(), points[i-1].y(), points[i].x(), points[i].y());
     }
     if (orbit > 0 && state) {
-      painter.setPen(QPen(QColor::fromRgbF(0.5, 0.6, 0.2), 2));
+      painter.setPen(QPen(drawColor, 2));
       double x = state->X(points[0].x());
       double y = state->Y(points[0].y());
       for (int i = 1; i < n; i++) {
@@ -249,6 +260,9 @@ void ItView::keyPressEvent(QKeyEvent *event) {
   if (keyPressed >= 49 && keyPressed < 58) { // 49="1"
     orbit = keyPressed - 48;
     addOrbit();
+  } else if (keyPressed == 82) { // 82='r'
+    randomizeColors();
+    update();
   } else {
     orbit = 0;
     if (state) state->ClearAnnotations();

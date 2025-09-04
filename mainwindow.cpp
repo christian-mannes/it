@@ -117,9 +117,9 @@ MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui
 
   if (darkMode) {
     ui->actionCompile->setIcon(QIcon(":/icons/dark/hammer-outline.svg"));
-    ui->actionStart->setIcon(QIcon(":/icons/dark/arrow-forward-circle-outline.svg"));
-    ui->actionStop->setIcon(QIcon(":/icons/dark/close-circle-outline.svg"));
-    ui->actionBack->setIcon(QIcon(":/icons/dark/arrow-back-circle-outline.svg"));
+    ui->actionStart->setIcon(QIcon(":/icons/dark/play-outline.svg"));
+    ui->actionStop->setIcon(QIcon(":/icons/dark/close-outline.svg"));
+    ui->actionBack->setIcon(QIcon(":/icons/dark/arrow-back-outline.svg"));
     ui->actionImage->setIcon(QIcon(":/icons/dark/image-outline.svg"));
     ui->actionCode->setIcon(QIcon(":/icons/dark/pencil-outline.svg"));
     ui->actionHelp->setIcon(QIcon(":/icons/dark/book-outline.svg"));
@@ -157,7 +157,9 @@ void MainWindow::postInit() {
   treemodel = initFunctionList();
   ui->treeView->setTreeModel(treemodel);
   ui->treeView->expandAll();
-  ui->treeView->preferredWidth = 160;
+  ui->treeView->preferredWidth = 100;
+  ui->splitter->setStretchFactor(0, 0);
+  ui->splitter->setStretchFactor(1, 1);
   connect(ui->treeView, &TreeView::itemDoubleClicked, this, &MainWindow::treeItemDoubleClicked);
   connect(ui->treeView, &TreeView::itemSelectionChanged, this, &MainWindow::treeSelectionChanged);
   connect(treemodel, &TreeModel::itemMoved, this, &MainWindow::treeItemMoved);
@@ -929,8 +931,9 @@ void MainWindow::on_actionCheat_Sheet_triggered() {
       "<li>Mouse wheel down: zoom in (click to reset)</li>"
       "<li>Shift-left-drag: thumbnail (in parameter space only)</li>"
       "<li>Alt-left-drag: draw </li>"
-      "<li>1-9: set orbit length</li>"
-      "<li>0: reset orbit</li>"
+      "<li>Keys 1-9: set orbit length</li>"
+      "<li>Key 0: reset orbit</li>"
+      "<li>Key R: randomlize colors for selection and orbit</li>"
     "</ul>");
 }
 
