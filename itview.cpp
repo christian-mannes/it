@@ -37,9 +37,9 @@ ItView::ItView(QWidget *parent) : QWidget{parent} {
   connect(this, &ItView::renderFinished, this, &ItView::onRenderFinished);
   setMouseTracking(true);
   orbit = 0;
-  selectionColor = QColor::fromRgbF(0, 1, 0);
-  orbitColor = QColor::fromRgbF(0.5, 1, 0.7);
-  drawColor = QColor::fromRgbF(0.5, 0.6, 0.2);
+  selectionColor = QColor::fromRgbF(0.0f, 1.0f, 0.0f);
+  orbitColor = QColor::fromRgbF(0.5f, 1.0f, 0.7f);
+  drawColor = QColor::fromRgbF(0.5f, 0.6f, 0.2f);
 }
 
 ItView::~ItView() {

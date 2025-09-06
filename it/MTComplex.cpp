@@ -24,12 +24,10 @@
 
 #include "MTComplex.h"
 
-#ifndef asinh
+#ifdef NEED_ASINH
 double asinh(double x) {
   return log(x + sqrt(x * x + 1));
 }
-#endif
-#ifndef acosh
 double acosh(double x) {
   return log(x + sqrt(x * x - 1));
 }

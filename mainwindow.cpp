@@ -239,6 +239,19 @@ void MainWindow::on_actionClear_Settings_triggered() {
 
 void MainWindow::firstTimeUse(bool acceptLegacy) {
   qDebug() << "First time use...";
+#ifdef Q_OS_APPLE
+  firstTimeUseMac(acceptLegacy);
+#endif
+#ifdef Q_OS_WIN
+  firstTimeUseWin(acceptLegacy);
+#endif
+}
+void MainWindow::firstTimeUseWin(bool acceptLegacy) {
+
+}
+
+void MainWindow::firstTimeUseMac(bool acceptLegacy) {
+#ifdef Q_OS_APPLE
   // Do we have the legacy directory ~/Library/Application Support/It ?
   QString legacyPath = QDir::homePath() + "/Library/Application Support/It";
   QDir legacyDir(legacyPath);
@@ -278,15 +291,10 @@ void MainWindow::firstTimeUse(bool acceptLegacy) {
     QString mapszip = QApplication::applicationDirPath() + "/../Resources/maps.zip";
     QProcess process;
     QStringList args;
-#ifdef Q_OS_WIN
-    args << zipPath << "-d" << extractDir;
-    process.start("powershell", QStringList() << "Expand-Archive" << args);
-#else
     args << "-o" << mapszip << "-d" << filesDirectory;
     process.start("unzip", args);
     process.waitForFinished();
     qDebug() << "Installed maps" << (process.exitCode() == 0 ? "ok" : "FAIL");
-#endif
   }
 
   // Install include files for compilation
@@ -296,13 +304,10 @@ void MainWindow::firstTimeUse(bool acceptLegacy) {
     QString itzip = QApplication::applicationDirPath() + "/../Resources/it.zip";
     QProcess process;
     QStringList args;
-#ifdef Q_OS_WIN
-#else
       args << "-o" << itzip << "-d" << filesDirectory;
       process.start("unzip", args);
       process.waitForFinished();
       qDebug() << "Installed it" << (process.exitCode() == 0 ? "ok" : "FAIL");
-#endif
   }
 
   QString nbdirpath = filesDirectory + "notebooks";
@@ -318,6 +323,7 @@ void MainWindow::firstTimeUse(bool acceptLegacy) {
     QDir fd(filesDirectory);
     fd.mkpath(buildpath);
   }
+#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -647,7 +653,7 @@ void MainWindow::on_thumb_slider_valueChanged(int value) {
 
 void MainWindow::on_resolution_xres_textChanged(const QString &arg1)
 {
-  int xres, yres;
+  int xres;
   try {
     xres = arg1.toInt();
     double xmin = ui->xmin_le->text().toDouble();

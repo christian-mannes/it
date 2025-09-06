@@ -217,7 +217,7 @@ void Function::rational_rays(complex cc, int depth,
   complex b=escaperad*polar(1,TWO_PI*p/q);
   complex fn=b, dfn=1, goal, c=cc;
   
-  double itinerary[depth]; 
+  double *itinerary = new double[depth];
   int noit = 0, nit;
   
   Itinerary(p, q, depth, itinerary, degree);
@@ -241,7 +241,8 @@ void Function::rational_rays(complex cc, int depth,
       state->setPixel(state->invX(b.re), state->invY(b.im), 255);
     }
     noit++;
-  }    
+  }
+  delete [] itinerary;
 }
 
 //********************************************************************//
@@ -293,7 +294,7 @@ void Function::draw_equi(complex cc, double  potential, int p_initial,
   
   int depth = 100 + 
   int(floor((log(log(escaperadius)) - log(potential)) / log(degree)));   
-  double itinerary[depth];
+  double *itinerary = new double[depth];
   
   int noit=0, nit;
   complex b, fn, dfn, goal;
@@ -331,6 +332,7 @@ void Function::draw_equi(complex cc, double  potential, int p_initial,
     
     noit++; 
   }
+  delete [] itinerary;
 }
 
 //*************************************************************//
@@ -347,7 +349,7 @@ void Function::draw_sect(complex c, int p, int q, double slope,
   
   int degree = 2; // this is the degree of the polynomial ; 
   
-  double itinerary[depth]; 
+  double *itinerary = new double[depth];
   Itinerary(p, q, depth, itinerary, degree);
   
   complex b = polar(escaperadius,TWO_PI*p/q+slope*log(escaperadius)); 
@@ -369,8 +371,8 @@ void Function::draw_sect(complex c, int p, int q, double slope,
     else
       goalpot = log(abs(fn))*(abs(log(fn))-1.0/4)/(abs(log(fn)));
     goalarg = TWO_PI*(itinerary[nit]+slope*goalpot/TWO_PI-
-                      floor(itinerary[nit]+slope*goalpot/TWO_PI+.5
-                            -arg(fn)/TWO_PI));
+                      floor((double)(itinerary[nit]+slope*goalpot/TWO_PI+.5
+                            -arg(fn)/TWO_PI)));
     
     goal = complex(goalpot,goalarg);
     
@@ -384,7 +386,8 @@ void Function::draw_sect(complex c, int p, int q, double slope,
       state->setPixel(state->invX(b.re),state-> invY(b.im), 255);
     }
     noit++;
-  }    
+  }
+  delete [] itinerary;
 }
 
 /////////////////////////// Drawing functions ////////////////////////////

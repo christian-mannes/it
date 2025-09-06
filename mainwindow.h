@@ -85,6 +85,8 @@ private:
   void saveSettings();
   void loadSettings();
   void firstTimeUse(bool acceptLegacy);
+  void firstTimeUseMac(bool acceptLegacy);
+  void firstTimeUseWin(bool acceptLegacy);
 
   SyntaxHighlighterCPP *highlighter;
 

@@ -299,10 +299,8 @@ complex	exponent(complex);
 complex mod2pi(complex);
 complex cacos(complex);
 
-#ifndef asinh
+#ifdef NEED_ASINH
 double asinh(double x);
-#endif
-#ifndef acosh
 double acosh(double x);
 #endif
 

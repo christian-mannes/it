@@ -48,7 +48,7 @@ public:
   std::unordered_map<String,ItArg*> hash;
   std::vector<ItArg*> list;
   void apply();
-  int count() { return list.size(); }
+  int count() { return (int)list.size(); }
   ItArg *getArgAt(int i) { return list[i]; }
   void addArg(const char *name, ItArg *arg);
   ItArg *getArg(const char *name);

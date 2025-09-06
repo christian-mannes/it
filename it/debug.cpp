@@ -1,4 +1,5 @@
 #include "debug.h"
+#include <stdexcept>
 using namespace std;
 
 bool parse_int(const char *str, int n, void *dest);
@@ -34,7 +35,7 @@ const bool Arg::isDouble() const { return parser == parse_double; };
 const bool Arg::isString() const { return parser == parse_string; };
 
 bool Arg::parse(const char *str, int n) const {
-  if (!parser) throw runtime_error("Arg::parse: no parser set. Did you pass a value instead a pointer? (if you see this, talk to a developer)"); //return false;
+  if (!parser) throw std::runtime_error("Arg::parse: no parser set. Did you pass a value instead a pointer? (if you see this, talk to a developer)"); //return false;
   return parser(str, n, pval);
 }
 
