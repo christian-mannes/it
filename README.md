@@ -18,7 +18,7 @@ You can have a quick look at some of the possibilities of It in the screenshots 
 
 A [**manual**](doc/manual.md) is provided explaining how to code your own functions.
 
-*It* works on MacOS, Linux, and Windows. You can **download** binaries from the [download section](doc/download.md).
+*It* works on MacOS, Linux, and Windows. You can **[download](doc/download.md)** binaries -- see there for installation instructions.
 
 *It* can be used free of charge under the MIT license. Should you require support, please contact the maintainer.
 

@@ -1,6 +1,6 @@
 # *It* Download and Installation
 
-*It* works under MacOS, Windows, and Linux.
+*It* works under MacOS, Windows, and Linux. See the appropriate section for installation instructions on your platform.
 
 ## MacOS
 *It* is supported for MacOS versions 11 (Big Sur) or newer. 
@@ -28,6 +28,11 @@ for your files. Select any directory you see fit.
 > If this is not what you intended, use the File > Set Files Directory option.
 
 ## Windows
+*It* supports Windows 11 - it may work on other versions but has not been tested.
+
+### Prerequisites
+You must have a C++ compiler installed on your machine. We strongly recommend installing the [Visual Studio Community Edition](https://visualstudio.microsoft.com/vs/community/). You should at least download support for C++ development. *It* assumes that you are using the MSVCC 2022 compiler.
+
 TODO
 
 ## Linux

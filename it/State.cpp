@@ -244,7 +244,6 @@ void State::ClearAnnotations() {
 void State::AddAnnotation(const char *fun, double rc, double x0, double x1, double x2, double x3, const char *str) {
   annotations.push_back(new Annotation(fun, rc, x0, x1, x2, x3, str));
 }
-
 void State::SetStrokeColor(double r, double g, double b, double opa) {
   AddAnnotation("SetStrokeColor", false, r, g, b, opa);
 }

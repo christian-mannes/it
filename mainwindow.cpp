@@ -446,7 +446,7 @@ void MainWindow::treeSelectionChanged(TreeItem* current, TreeItem* previous) {
   if (current) {
     QString name = current->displayName();
     if (current->isItem()) {
-      setFunction(name);
+      setFunction(name, false);
     }
   }
 }
@@ -526,18 +526,23 @@ void MainWindow::on_actionShow_Functions_triggered() {
 
 void MainWindow::on_actionCompile_triggered() {
   codeHasChanged = true;
-  setFunction(currFunction);
+  setFunction(currFunction, false);
 }
 
 void MainWindow::on_actionStart_triggered() {
   if (codeHasChanged) {
-    setFunction(currFunction); // reload and recompile if necessary
+    setFunction(currFunction, true); // reload and recompile if necessary
+    return;
   }
+  start();
+}
+
+void MainWindow::start() {
+  double xmin, xmax, ymin, ymax;
+
   if (function == nullptr) return;
   if (colormap == nullptr) return;
   ui->stackedWidget->setCurrentIndex(IMAGE_TAB);
-
-  double xmin, xmax, ymin, ymax;
 
   if (state != nullptr && !ui->itView->selection.isEmpty()) { // auto-zoom
     QRect &sel = ui->itView->selection;
@@ -774,10 +779,10 @@ void MainWindow::saveFunctionList() {
   file.close();
 }
 
-void MainWindow::setFunction(const QString &newFunction) {
+void MainWindow::setFunction(const QString &newFunction, bool thenStart) {
   if (newFunction.isEmpty()) return;
   if (newFunction == currFunction) {
-    if (codeHasChanged) { // and has been saved... (autosave, TODO)
+    if (codeHasChanged) { // recompile sets this to true
       if (!saveCode(newFunction, ui->codeEditor->toPlainText())) {
         QMessageBox msgBox;
         msgBox.setText(QString("Failed to save function %1").arg(newFunction)); // TODO: show why
@@ -788,6 +793,7 @@ void MainWindow::setFunction(const QString &newFunction) {
       return; // nothing to do
     }
   }
+
   currFunction = newFunction;
 
   // Unload current function
@@ -805,33 +811,38 @@ void MainWindow::setFunction(const QString &newFunction) {
     dylib = nullptr;
   }
 
-  // Load new function
+  // Load function code
+  QString file, fname = name2file(newFunction);
+  bool builtin_ = false;
   if (builtin.contains(newFunction)) {
-    function = createBuiltinFunction(newFunction.toStdString());
-    ui->codeEditor->setPlainText("");
-    QTimer::singleShot(0, this, [this]() { codeHasChanged = false; });
+    file = QApplication::applicationDirPath() + "/../Resources/builtin_" + fname + ".txt";
+    builtin_ = true;
   } else {
-    if (!compileAndLoad(name2file(newFunction))) {
-      ui->stackedWidget->setCurrentIndex(CODE_TAB);
-      QMessageBox msgBox;
-      msgBox.setText(QString("Failed to load function %1").arg(newFunction)); // TODO: show why
-      msgBox.exec();
-      return;
+    file = filesDirectory + fname + ".cpp";
+  }
+  QFileInfo fileinfo(file);
+  if (fileinfo.exists()) {
+    QFile codefile(file);
+    if (codefile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      QTextStream stream(&codefile);
+      QString contents = stream.readAll();
+      ui->codeEditor->setPlainText(contents);
+      if (!thenStart) ui->stackedWidget->setCurrentIndex(CODE_TAB);
     }
+  } else {
+    ui->codeEditor->setPlainText("");
+    qDebug() << file << "not found";
+    return;
   }
 
-  function->defaults();
-  function->other->defaults();
-
-  int pspace = ui->pspace_radio->isChecked() ? 1 : 0;
-  if (function->pspace != pspace) function = function->other;
-
-  showDefaultCoordinates();
-  paramsmodel->setFunction(function);
-  ui->paramsTableView->show();
-
-  ui->itView->clear();
-  statusBar()->showMessage(QString("Loaded %1").arg(currFunction));
+  // Compile and load from callback (async)
+  QTimer::singleShot(0, this, [this,fname,builtin_,thenStart]() {
+    if (!compileAndLoad(fname, builtin_, thenStart)) {
+      QMessageBox msgBox;
+      msgBox.setText(QString("Failed to load function %1").arg(currFunction));
+      msgBox.exec();
+    }
+  });
 }
 
 bool MainWindow::saveCode(const QString &name, const QString &code) {
@@ -851,78 +862,82 @@ bool MainWindow::saveCode(const QString &name, const QString &code) {
   }
 }
 
-bool MainWindow::compileAndLoad(const QString &fname) {
+bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenStart) {
   qDebug() << "compileAndLoad" << fname; // pass fname2file(fname)
-  // TODO: directories on other platforms
-#if 0
-  QString home = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-  QString file = home + "/Library/Application Support/It/" + fname + ".cpp";
-  QString lib = home + "/Library/Application Support/It/build/" + fname + ".dylib";
-  QString comp = home + "/Code/it3/compile_macos.sh";
-#else
-  QString file = filesDirectory + fname + ".cpp";
-  QString lib = filesDirectory + "build/" + fname + ".dylib";
-  QString exe = QApplication::applicationDirPath() + "/It";
-  QString comp = QApplication::applicationDirPath() + "/../Resources/compile_macos.sh";
-#endif
-  QFileInfo fileinfo(file);
-  QFileInfo libinfo(lib);
-  QFileInfo exeinfo(exe);
-  codeHasChanged = false;
-  codeHasErrors = false;
-  if (fileinfo.exists()) {
-    QFile codefile(file);
-    if (codefile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      QTextStream stream(&codefile);
-      QString contents = stream.readAll();
-      ui->codeEditor->setPlainText(contents);
-      QTimer::singleShot(0, this, [this]() { codeHasChanged = false; });
-    }
+  if (builtin_) {
+    function = createBuiltinFunction(currFunction.toStdString());
   } else {
-    qDebug() << file << "not found";
-    return false;
-  }
-  int exitCode = 0;
-  if (!libinfo.exists() || fileinfo.lastModified() > libinfo.lastModified() || exeinfo.lastModified() > libinfo.lastModified()) { // must compile, TODO: older than our own executable
-    QProcess proc;
-    QStringList args;
+    // TODO: directories on other platforms
+    QString file = filesDirectory + fname + ".cpp";
+    QString lib = filesDirectory + "build/" + fname + ".dylib";
     QString exe = QApplication::applicationDirPath() + "/It";
-    args << comp << fname << filesDirectory << exe;
-    qDebug() << "Will run: bash" << args;
-    proc.start("bash", args);
-    proc.waitForFinished();
-    exitCode = proc.exitCode();
-  } else {
-    qDebug() << "No need to compile";
-  }
-  if (exitCode == 0) {
-    qDebug() << "Compiled ok";
-    dylib = new QLibrary(lib);
-    if (dylib->load()) {
-      createfun = (CreateFunction)dylib->resolve("_createFunction");
-      if (createfun == nullptr) { qDebug() << "Could not resolve function"; return false; }
-      function = createfun(1); // param space first
-      function->other = createfun(0); // dyn space is other
-      function->other->other = function;
+    QString comp = QApplication::applicationDirPath() + "/../Resources/compile_macos.sh";
+
+    QFileInfo fileinfo(file);
+    QFileInfo libinfo(lib);
+    QFileInfo exeinfo(exe);
+    codeHasChanged = false;
+    codeHasErrors = false;
+
+    int exitCode = 0;
+    if (!libinfo.exists() || fileinfo.lastModified() > libinfo.lastModified() || exeinfo.lastModified() > fileinfo.lastModified()) {
+      // Must compile
+      QProcess proc;
+      QStringList args;
+      QString exe = QApplication::applicationDirPath() + "/It";
+      args << comp << fname << filesDirectory << exe;
+      qDebug() << "Will run: bash" << args;
+      proc.start("bash", args);
+      proc.waitForFinished();
+      exitCode = proc.exitCode();
     } else {
-      qDebug() << "Could not load: " << dylib->errorString();
+      qDebug() << "No need to compile";
     }
-    return true;
-  } else {
-    codeHasErrors = true;
-    qDebug() << "Could not compile, code:" << exitCode;
-    //QString errs = home + "/Library/Application Support/It/build/errors.txt";
-    QString errs = filesDirectory + "build/errors.txt";
-    QStringList errors;
-    QFile errsfile(errs);
-    if (errsfile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      QTextStream stream(&errsfile);
-      QString errors = stream.readAll();
-      ui->errorsView->setPlainText(errors);
-      ui->errorsView->show();
+    if (exitCode == 0) {
+      qDebug() << "Compiled ok";
+      dylib = new QLibrary(lib);
+      if (dylib->load()) {
+        createfun = (CreateFunction)dylib->resolve("_createFunction");
+        if (createfun == nullptr) { qDebug() << "Could not resolve function"; return false; }
+        function = createfun(1); // param space first
+        function->other = createfun(0); // dyn space is other
+        function->other->other = function;
+      } else {
+        qDebug() << "Could not load: " << dylib->errorString();
+      }
+    } else {
+      codeHasErrors = true;
+      qDebug() << "Could not compile, code:" << exitCode;
+      QString errs = filesDirectory + "build/errors.txt";
+      QStringList errors;
+      QFile errsfile(errs);
+      if (errsfile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream stream(&errsfile);
+        QString errors = stream.readAll();
+        ui->errorsView->setPlainText(errors);
+        ui->errorsView->show();
+      }
+      return false;
     }
-    return false;
   }
+
+  function->defaults();
+  function->other->defaults();
+
+  int pspace = ui->pspace_radio->isChecked() ? 1 : 0;
+  if (function->pspace != pspace) function = function->other;
+
+  showDefaultCoordinates();
+  paramsmodel->setFunction(function);
+  ui->paramsTableView->show();
+
+  ui->itView->clear();
+  statusBar()->showMessage(QString("Loaded %1").arg(currFunction));
+
+  if (thenStart) {
+    start();
+  }
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

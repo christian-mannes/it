@@ -63,16 +63,20 @@ void ItView::paintEvent(QPaintEvent *event) {
 }
 
 void ItView::drawAnnotations(QPainter &painter, const std::vector<Annotation*> &annotations) {
-  double linew = 1.0;
-  painter.setPen(QPen(QColor::fromRgbF(1, 1, 1), 2));
+  double linew = 2.0;
+  QPen pen = QPen(orbitColor, linew);
+  painter.setPen(pen);
   QBrush brush;
   for (Annotation *a: annotations) {
     if (a->f == "DrawLine") {
       painter.drawLine(state->invX(a->p0), state->invY(a->p1), state->invX(a->p2), state->invY(a->p3));
     } else if (a->f == "SetLineWidth") {
       linew = a->p0;
+      pen.setWidth(linew);
+      painter.setPen(pen);
     } else if (a->f == "SetStrokeColor") {
-      painter.setPen(QPen(QColor((int)a->p0, (int)a->p1, (int)a->p2), linew));
+      pen = QPen(QColor((int)a->p0, (int)a->p1, (int)a->p2), linew);
+      painter.setPen(pen);
     } else if (a->f == "SetFillColor") {
       brush = QBrush(QColor((int)a->p0, (int)a->p1, (int)a->p2));
     } else if (a->f == "DrawRect") {
@@ -232,7 +236,8 @@ void ItView::addOrbit() {
   double y = state->Y(mousey);
   complex z(x, y);
   state->ClearAnnotations();
-  state->SetStrokeColor(255,127,255);
+  state->SetStrokeColor(orbitColor.red(), orbitColor.green(), orbitColor.blue());
+  state->SetLineWidth(2.0);
   for (int i = 0; i < orbit; i++) {
     function->orbit(z);
     state->DrawLine(x, y, z.real(), z.imag());

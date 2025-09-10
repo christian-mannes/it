@@ -67,6 +67,8 @@ qt_add_executable(It
     README.md
     LICENSE.md
     deploy.sh
+    doc/download.md doc/manual.md
+    builtin_mandi.txt
 )
 
 file(GLOB_RECURSE IT_SOURCES "${CMAKE_SOURCE_DIR}/it/*")
@@ -96,6 +98,8 @@ if(APPLE)
     set_source_files_properties(compile_macos.sh PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE template.txt)
     set_source_files_properties(template.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(It PRIVATE builtin_mandi.txt)
+    set_source_files_properties(builtin_mandi.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE ${IT_ZIP})
     set_source_files_properties(${IT_ZIP} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE ${MAPS_ZIP})

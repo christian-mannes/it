@@ -39,7 +39,7 @@ find It.app/Contents/PlugIns -name "*.dylib" -exec codesign \
     --force --sign "${IT_SIGNING_IDENTITY}" {} \;
 
 codesign --force --verify --verbose --timestamp --options runtime \
-    --entitlements "It.entitlements" \
+    --entitlements "../../It.entitlements" \
     --sign "${IT_SIGNING_IDENTITY}" It.app
 
 codesign --verify --deep --strict It.app
@@ -72,5 +72,8 @@ hdiutil create -volname "It" -srcfolder dmg_contents -ov -format UDZO It.dmg
 
 # 4. Clean up
 rm -rf dmg_contents
+
+# 5. Copy dmg to download directory (doc)
+mv It.dmg ../../doc
 
 echo "DONE!"

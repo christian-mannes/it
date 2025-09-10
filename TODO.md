@@ -40,40 +40,42 @@
 - [X] Help page and cheat sheet
 - [X] Annotations: function vs temporary (orbit, Clear from index)
 - [X] Randomize colors (R -> drawing colors)
+- [X] Need two save/compile to fix an error (runs wrong version?)
+- [X] Put when to compile in code, compile unconditionally
 
-- [ ] Put when to compile in code, compile unconditionally
-- [ ] Warn if no compiler is found
-- [ ] Bookmark places (complete param set)
+- [ ] Github
+    - [X] Readme becomes web page
+    - [X] Proper readme / introduction
+    - [X] Include manual / web page
+    - [ ] Add DMG to repo
+    - [ ] Make repo public
+    
+- [ ] Show code for samples (read only)
+- [ ] Link for manual -> github version
 
 - [X] MacOS packaging/signing/DMG
 - [ ] Windows version
 - [ ] Linux version
 
-- [ ] Github (gitlab/gitea/codeberg)
-    - [ ] Readme becomes web page
-    - [ ] Proper readme / introduction
-    - [ ] Include manual / web page
-    - [ ] App store? 
-    - [ ] Qt showcase?
-    
-git remote add origin https://github.com/christian-mannes/it.git
-git push -u origin main
+
 
 - [ ] Check all of Nuria's files
 - [ ] Get better colormaps (3D effect?)
 - [ ] A few built-in functions
+- [ ] Bookmark places (complete param set)
 - [ ] Add your own colormap
 - [ ] Customize appearance treeview/branch 
 
+- [ ] App store
+- [ ] Qt showcase
+
 ---Help------------------------------------------------------------------------
-- [ ] About menu (prepared, see Claude)
-- [ ] Explain how to get a compiler
+- [X] About menu (prepared, see Claude)
+- [X] Explain how to get a compiler
+- [X] Help: Show long help as web page (integrated)
+- [ ] New screenshots (in dark mode, too)
 - [ ] Add how to debug
-- [ ] Manual: local web page
-- [ ] Help: Show cheatsheet from help
-- [ ] Help: Show long help as web page (integrated)
-- [ ] Add "what's new": continuous colormaps
-- [ ] Mention minimum version 11 (Big Sur)
+- [ ] Add how to find and fix errors
 
 ---Ideas-----------------------------------------------------------------------
 - [ ] Compute servers (other copies)

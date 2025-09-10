@@ -94,11 +94,12 @@ private:
   CreateFunction createfun;
 
   TreeModel *initFunctionList();
+  void start();
   void saveFunctionList();
   void saveFunctionList_(QTextStream &ts, TreeItem *item);
   bool saveCode(const QString &name, const QString &code);
-  bool compileAndLoad(const QString &name);
-  void setFunction(const QString &name);
+  bool compileAndLoad(const QString &name, bool builtin_, bool thenStart);
+  void setFunction(const QString &name, bool thenStart);
   QString currFunction; // "Mandi"
   QString savedFunction; // "Mandi"
   void showDefaultCoordinates();

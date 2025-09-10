@@ -4,10 +4,28 @@
 
 ![It User Interface](../img/gui.png)
 
+## What's new in version 4.0
+*It* has been rewritten for version 4.0. The new version maintains backward compatibility with older versions.
+
+New features:
+- Mac: support for Apple Silicon
+- Windows version
+- Linux version
+- Open sourced, available on github
+- Simplified installation / first time use
+- Continuous colormaps - use `double iterate_(double x, double y)`
+- Better code editor and error messages
+- Export to PNG, SVG and PDF
+- Debugging statement - messages shown in app
+- Improved orbit drawing
+- Can draw figure and show iterated figure
+- Mouse and keyboard operations cheat sheet
+- Adadpts to dark/light mode
+- Python Notebook integration (experimental)
 
 ## Writing Your Own Functions
 
-While *It* comes with a number of built-in functions, the real reason to use It is to create your own. Functions are written in the C++ language and are compiled on-the-fly by the application. C++ has a reputation of being a large and complex language. However, writing functions for It does not require any of the more esoteric features of C++, which is why a basic command of basic C and a ability to learn by example should be sufficient.
+While *It* comes with some built-in functions, the real reason to use *It* is to create your own. Functions are written in the C++ language and are compiled on-the-fly by the application. C++ has a reputation of being a large and complex language. However, writing functions for It does not require any of the more esoteric features of C++, which is why a basic command of basic C and a ability to learn by example should be sufficient.
 
 Creating a new function for *It*, in a technical sense, means creating a subclass of the C++ class called Function. From a practical point of view, creating a new function means choosing "New Function" from the File menu. This will present you with template code: that is, code that works as is (the quadratic function, i.e. the well-known Mandelbrot set). Your job will then be consist of the following steps:
 

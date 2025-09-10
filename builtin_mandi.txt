@@ -38,9 +38,7 @@ double iterate_(double x, double y) {
     z = z * z + cc;
     if (norm(z) > escape * escape) break;
   }
-  //debug("%d %d", i, depth);
-
-  return (double)i / depth;
+  return (double)i / depth);
 }
 
 // Forward orbit: assign f(x) to x
@@ -64,17 +62,5 @@ void sandbox() {
   SetStrokeColor(0, 0, 0);
 }
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-Function *createBuiltinFunction(const std::string &name) {
-  Function *p = nullptr, *d = nullptr;
-  if (name == "Mandi") {
-    p = new Quadratic("a", "b", 1);
-    d = new Quadratic("a", "a", 0);
-  }
-  if (p && d) { p->other = d; d->other = p; }
-  return p;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
