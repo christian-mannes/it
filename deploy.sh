@@ -74,6 +74,6 @@ hdiutil create -volname "It" -srcfolder dmg_contents -ov -format UDZO It.dmg
 rm -rf dmg_contents
 
 # 5. Copy dmg to download directory (doc)
-mv It.dmg ../../doc
+cp It.dmg ../../doc
 
 echo "DONE!"

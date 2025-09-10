@@ -15,7 +15,7 @@ xcode-select --install
 and following the on-screen instructions.
 
 ### Installation Instructions:
-- Download [It.dmg](doc/It.dmg)
+- Download [It.dmg](https://github.com/christian-mannes/it/releases/download/4.0b1/It.dmg)
 - Open the .dmg
 - Drag It.app into the application folder (or anywhere else if you prefer)
 - Double-click It.app to open it.
