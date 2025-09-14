@@ -133,7 +133,7 @@ void _uitoa(string &buf, FormatParams_ &p, uint64 value) {
   while (value / d >= p.base)
     d *= p.base;
   while (d != 0) {
-    int dgt = value / d;
+    uint64 dgt = value / d;
     value %= d;
     d /= p.base;
     if (n || dgt > 0 || d == 0) {
@@ -221,7 +221,7 @@ string _fmt(const char *fmt, const Arg *args, size_t num_args) {
           if (p.sign && value > 0) sign = '+';
           if (value < 0) { sign = '-'; value *= -1; }
           _uitoa(buf, p, (uint64)value);
-          _padl(str, p, buf.length(), sign);
+          _padl(str, p, (int)buf.length(), sign);
           str += buf;
         }
         break;
@@ -300,7 +300,7 @@ string _fmt(const char *fmt, const Arg *args, size_t num_args) {
             buf += '.';
             buf += dbuf;
           }
-          _padl(str, p, buf.length(), sign);
+          _padl(str, p, (int)buf.length(), sign);
           str += buf;
         }
         break;
@@ -312,7 +312,7 @@ string _fmt(const char *fmt, const Arg *args, size_t num_args) {
           string buf;
           buf.reserve(16);
           _uitoa(buf, p, value);
-          _padl(str, p, buf.length(), NOSIGN);
+          _padl(str, p, (int)buf.length(), NOSIGN);
           str += buf;
         }
         break;
