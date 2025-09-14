@@ -16,7 +16,6 @@
 #include "Function.h"
 #include "State.h"
 //#include "Gif.h"
-
 #define COMPRESS
 
 /************************************************************************/
@@ -24,13 +23,14 @@
 Function::Function(String name, String label, int _pspace) { 
   this->name = name;
   this->descr = name;
-  other = 0;
+  other = nullptr;
+  state = nullptr;
   doannotate = 0;
   defxmin = 0.0; defxmax = 1.0;
   defymin = 0.0; defymax = 1.0;
   pspace = _pspace;
-  iscopy = false;
   doDebug = false;
+  iscopy = false;
 }
 
 Function *Function::copy_() {

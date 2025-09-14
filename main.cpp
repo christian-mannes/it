@@ -8,6 +8,11 @@
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
+#ifdef _DEBUG
+    qDebug() << "Qt app using DEBUG runtime";
+#else
+    qDebug() << "Qt app using RELEASE runtime";
+#endif
 #if 0
   qDebug() << "=== Qt Plugin Debugging ===";
   qDebug() << "Application dir path:" << QCoreApplication::applicationDirPath();

@@ -7,7 +7,7 @@
 class ParamsModel : public QAbstractTableModel {
   Q_OBJECT
 public:
-  explicit ParamsModel(QObject *parent = nullptr) {}
+  explicit ParamsModel(QObject *parent = nullptr) { function = nullptr; }
   void setFunction(Function *f);
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;

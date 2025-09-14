@@ -31,8 +31,6 @@ if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
     set ARCH=x86
 )
 
-echo %ARCH% >  "%DIR%\build\errors.txt"
-
 REM Find and initialize Visual Studio
 set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 if exist "%VSWHERE%" (
@@ -56,7 +54,7 @@ if errorlevel 1 (
 REM Compiler settings
 set CPPFLAGS=/std:c++17 /EHsc /MD /Zi /D WIN32 /D _WINDOWS /D _USRDLL /FC /D_CRT_SECURE_NO_WARNINGS
 set IFLAGS=/I..\it
-set LFLAGS=/DLL /MACHINE:%ARCH%
+set LFLAGS=/DLL /MACHINE:%ARCH% /VERBOSE
 
 echo Using Visual Studio compiler
 echo.
@@ -136,7 +134,8 @@ REM Add the extern C function to ITFUN.cpp
 (
     type ITFUN_temp.cpp
     echo.
-    echo extern "C" __declspec^(dllexport^) void * __cdecl _createFunction^(int pspace^) { return new %CLASSNAME%^("%CLASSNAME%", "label", pspace^); }
+    rem echo extern "C" __declspec^(dllexport^) void *_createFunction^(int pspace^) { return new %CLASSNAME%^("%CLASSNAME%", "label", pspace^); }
+    echo extern "C" __declspec^(dllexport^) void * __cdecl _createFunction^(int pspace^) { static %CLASSNAME% instance^("%CLASSNAME%", "label", pspace^); return ^&instance; }
 ) > ITFUN.cpp
 del ITFUN_temp.cpp
 
