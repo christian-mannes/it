@@ -17,7 +17,7 @@
 #include "Function.h"
 #include "paramsmodel.h"
 #include "syntaxhighlightercpp.h"
-#include "jupyter.h"
+//#include "jupyter.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -254,12 +254,70 @@ void MainWindow::firstTimeUse(bool acceptLegacy) {
 #endif
 }
 void MainWindow::firstTimeUseWin(bool acceptLegacy) {
+#ifdef Q_OS_WIN
+  filesDirectory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+  QDir dir;
+  if (!dir.mkpath(filesDirectory)) {
+    qDebug() << "Could not create files directory";
+  } else {
+    qDebug() << "app data dir created";
+  }
+  if (!filesDirectory.endsWith("/")) filesDirectory += "/";
+  resourceDirectory = QApplication::applicationDirPath() + "/";
+  qDebug() << "filesDirectory:" << filesDirectory;
 
+  // Install color maps
+  QFileInfo exe(QApplication::applicationDirPath() + "/It.exe");
+  QFileInfo mapsdir(filesDirectory + "maps");
+  if (!mapsdir.exists() || mapsdir.lastModified() < exe.lastModified()) {
+    qDebug() << "Installing maps";
+    QString mapszip = resourceDirectory + "maps.zip";
+    QProcess process;
+    QStringList args;
+    args << "-Command";
+    args << QString("Expand-Archive -Path '%1' -DestinationPath '%2' -Force").arg(mapszip).arg(filesDirectory);
+    process.start("powershell.exe", args);
+    process.waitForFinished();
+    qDebug() << "POWERSHELL" << args;
+    qDebug() << "Installed maps" << (process.exitCode() == 0 ? "ok" : "FAIL");
+  }
+
+  // Install include files for compilation
+  QFileInfo itdir(filesDirectory + "it");
+  if (!itdir.exists() || itdir.lastModified() < exe.lastModified()) {
+    qDebug() << "Installing include files";
+    QString itzip = resourceDirectory + "it.zip";
+    QProcess process;
+    QStringList args;
+      args << "-Command";
+      args << QString("Expand-Archive -Path '%1' -DestinationPath '%2' -Force").arg(itzip).arg(filesDirectory);
+      process.start("powershell.exe", args);
+      process.waitForFinished();
+      qDebug() << "POWERSHELL" << args;
+      qDebug() << "Installed it" << (process.exitCode() == 0 ? "ok" : "FAIL");
+  }
+
+  QString nbdirpath = filesDirectory + "notebooks";
+  QFileInfo nbdir(nbdirpath);
+  if (!nbdir.exists()) {
+    QDir fd(filesDirectory);
+    fd.mkpath(nbdirpath);
+  }
+
+  QString buildpath = filesDirectory + "build";
+  QFileInfo builddir(buildpath);
+  if (!builddir.exists()) {
+    QDir fd(filesDirectory);
+    fd.mkpath(buildpath);
+  }
+#endif
 }
 
 void MainWindow::firstTimeUseMac(bool acceptLegacy) {
 #ifdef Q_OS_APPLE
   // Do we have the legacy directory ~/Library/Application Support/It ?
+  resourceDirectory = QApplication::applicationDirPath() + "/../Resources/";
+
   QString legacyPath = QDir::homePath() + "/Library/Application Support/It";
   QDir legacyDir(legacyPath);
   bool doPrompt = true;
@@ -396,7 +454,7 @@ void MainWindow::on_actionNew_Function_triggered() {
     "Function name:", QLineEdit::Normal,
     "", &ok);
   if (ok && !fname.isEmpty()) {
-    QString src = QApplication::applicationDirPath() + "/../Resources/template.txt";
+    QString src = resourceDirectory + "template.txt";
     QString cpp = filesDirectory + name2file(fname) + ".cpp";
     QFile::copy(src, cpp);
     ui->treeView->addItem(fname);
@@ -521,7 +579,6 @@ void MainWindow::on_actionSet_Files_Folder_triggered() {
   filesDirectory = "";
   firstTimeUse(false);
 }
-
 
 void MainWindow::on_actionShow_Functions_triggered() {
   if (ui->treeView->isHidden()) {
@@ -668,8 +725,7 @@ void MainWindow::on_thumb_slider_valueChanged(int value) {
   ui->itView->thumbsize = v;
 }
 
-void MainWindow::on_resolution_xres_textChanged(const QString &arg1)
-{
+void MainWindow::on_resolution_xres_textChanged(const QString &arg1) {
   int xres;
   try {
     xres = arg1.toInt();
@@ -728,7 +784,6 @@ TreeModel *MainWindow::initFunctionList() {
   root->appendChild(item);
 
   // Read f_list.txt file
-  //QString path = QDir::homePath() + "/Library/Application Support/It/";
   QString path = filesDirectory;
   QString listpath = path + "f_list.txt";
   QFile inputFile(listpath);
@@ -827,7 +882,7 @@ void MainWindow::setFunction(const QString &newFunction, bool thenStart) {
   QString file, fname = name2file(newFunction);
   bool builtin_ = false;
   if (builtin.contains(newFunction)) {
-    file = QApplication::applicationDirPath() + "/../Resources/builtin_" + fname + ".txt";
+    file = resourceDirectory + "builtin_" + fname + ".txt";
     builtin_ = true;
   } else {
     file = filesDirectory + fname + ".cpp";
@@ -858,7 +913,7 @@ void MainWindow::setFunction(const QString &newFunction, bool thenStart) {
 }
 
 bool MainWindow::saveCode(const QString &name, const QString &code) {
-  QString home = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+  //QString home = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
   //QString path = home + "/Library/Application Support/It/" + name2file(name) + ".cpp";
   QString path = filesDirectory + name2file(name) + ".cpp";
   QFile file(path);
@@ -881,9 +936,18 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
   } else {
     // TODO: directories on other platforms
     QString file = filesDirectory + fname + ".cpp";
+  #ifdef Q_OS_MACOS
     QString lib = filesDirectory + "build/" + fname + ".dylib";
     QString exe = QApplication::applicationDirPath() + "/It";
     QString comp = QApplication::applicationDirPath() + "/../Resources/compile_macos.sh";
+    QString cmd = "bash";
+  #endif
+  #ifdef Q_OS_WIN
+    QString lib = filesDirectory + "build/" + fname + ".dll";
+    QString exe = QApplication::applicationDirPath() + "/It.exe";
+    QString comp = QApplication::applicationDirPath() + "/compile_windows.bat";
+    QString cmd = "cmd.exe";
+  #endif
 
     QFileInfo fileinfo(file);
     QFileInfo libinfo(lib);
@@ -896,10 +960,12 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
       // Must compile
       QProcess proc;
       QStringList args;
-      QString exe = QApplication::applicationDirPath() + "/It";
+  #ifdef Q_OS_WIN
+      args << "/c";
+  #endif
       args << comp << fname << filesDirectory << exe;
-      qDebug() << "Will run: bash" << args;
-      proc.start("bash", args);
+      qDebug() << "Will compile:" << cmd << args;
+      proc.start(cmd, args);
       proc.waitForFinished();
       exitCode = proc.exitCode();
     } else {

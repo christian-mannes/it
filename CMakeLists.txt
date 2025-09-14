@@ -68,6 +68,7 @@ qt_add_executable(It
     deploy.sh
     doc/download.md doc/manual.md
     builtin_mandi.txt
+    compile_windows.bat
 )
 
 file(GLOB_RECURSE IT_SOURCES "${CMAKE_SOURCE_DIR}/it/*")
@@ -75,24 +76,24 @@ file(GLOB_RECURSE MAP_FILES "${CMAKE_SOURCE_DIR}/maps/*")
 set(IT_ZIP ${CMAKE_CURRENT_BINARY_DIR}/it.zip)
 set(MAPS_ZIP ${CMAKE_CURRENT_BINARY_DIR}/maps.zip)
 
-add_custom_command(
-    OUTPUT ${IT_ZIP}
-    COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${IT_ZIP} --format=zip it
-    DEPENDS ${IT_SOURCES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Creating zip.zip from it directory"
-    VERBATIM
-)
-add_custom_command(
-    OUTPUT ${MAPS_ZIP}
-    COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${MAPS_ZIP} --format=zip maps
-    DEPENDS ${MAP_FILES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Creating maps.zip from maps directory"
-    VERBATIM
-)
-
 if(APPLE)
+    add_custom_command(
+        OUTPUT ${IT_ZIP}
+        COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${IT_ZIP} --format=zip it
+        DEPENDS ${IT_SOURCES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Creating zip.zip from it directory"
+        VERBATIM
+    )
+    add_custom_command(
+        OUTPUT ${MAPS_ZIP}
+        COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${MAPS_ZIP} --format=zip maps
+        DEPENDS ${MAP_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Creating maps.zip from maps directory"
+        VERBATIM
+    )
+
     target_sources(It PRIVATE compile_macos.sh)
     set_source_files_properties(compile_macos.sh PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE template.txt)
@@ -127,6 +128,35 @@ if(APPLE)
         PROPERTIES MACOSX_PACKAGE_LOCATION Resources
     )
     target_sources(It PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/icon.icns")
+elseif(WIN32)
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${IT_ZIP} --format=zip it
+        DEPENDS ${IT_SOURCES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Creating zip.zip from it directory"
+        VERBATIM
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${MAPS_ZIP} --format=zip maps
+        DEPENDS ${MAP_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Creating maps.zip from maps directory"
+        VERBATIM
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/template.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_mandi.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/compile_windows.bat" "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+    install(FILES ${IT_ZIP} DESTINATION .)
+    install(FILES ${MAPS_ZIP} DESTINATION .)
+    install(FILES compile_windows.bat DESTINATION .)
+    install(FILES template.txt DESTINATION .)
+    install(FILES builtin_mandi.txt DESTINATION .)
 endif()
 
 target_link_libraries(It PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::PrintSupport Qt6::Svg Qt6::Core)

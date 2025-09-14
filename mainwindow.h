@@ -120,6 +120,7 @@ private:
   Jupyter *jupyter;
 public:
   QString filesDirectory;
+  QString resourceDirectory;
   QString exportDirectory;
   bool doSaveSettings;
 };
