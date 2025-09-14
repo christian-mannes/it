@@ -1,4 +1,5 @@
 #include "jupyter.h"
+#if 0
 #include <QNetworkReply>
 #include <QRegularExpression>
 #include <QTimer>
@@ -126,3 +127,4 @@ void Jupyter::checkServerReady() {
     reply->deleteLater();
   });
 }
+#endif

@@ -1,6 +1,7 @@
 #ifndef JUPYTER_H
 #define JUPYTER_H
 
+#if 0
 #include <QObject>
 #include <QProcess>
 #include <QWebEngineView>
@@ -34,5 +35,5 @@ private:
 
 QString findJupyterPath();
 bool isJupyterAvailable();
-
+#endif
 #endif // JUPYTER_H

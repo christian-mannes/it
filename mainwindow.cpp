@@ -11,8 +11,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QRegularExpression>
-#include <QWebEngineView>
-#include <QUrl>
+#include <QTextBrowser>
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "Function.h"
@@ -47,7 +46,15 @@ QString name2file(const QString &name) {
 
 MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   mainWindow = this;
+
   ui->setupUi(this);
+  // Help text browser
+  QTextBrowser *browser = new QTextBrowser();
+  ui->stackedWidget->widget(2)->layout()->addWidget(browser);
+      // Or if the page doesn't have a layout, create one:
+  //    QVBoxLayout *layout = new QVBoxLayout(ui->stackedWidget->widget(0));
+  //    layout->addWidget(browser);
+
   function = nullptr;
   colormap = nullptr;
   state = nullptr;
@@ -344,10 +351,13 @@ void MainWindow::on_actionImage_triggered() { // show code editor
 
 void MainWindow::on_actionHelp_triggered() { // show help
   ui->stackedWidget->setCurrentIndex(HELP_TAB);
-  ui->helpView->load(QUrl("https://mannes-tech.com/It/manual.html"));
+  //ui->helpView->load(QUrl("https://mannes-tech.com/It/manual.html"));
+  ui->helpBrowser->setHtml("<h1>Hi</h1><p>this</p>");
+  //ui->helpBrowser->setSource(QUrl("https://mannes-tech.com/It/manual.html"));
 }
 
 void MainWindow::on_actionNotebook_triggered() { // show notebook
+#if 0
   if (jupyter == nullptr) {
     jupyter = new Jupyter(ui->notebookView, this);
     jupyter->startServer(filesDirectory + "notebooks");
@@ -358,10 +368,11 @@ void MainWindow::on_actionNotebook_triggered() { // show notebook
     ui->stackedWidget->setCurrentIndex(NOTEBOOK_TAB);
     jupyter->loadNotebook("");
   }
+#endif
 }
 void MainWindow::on_jupyterReady() {
   qDebug() << "READY";
-  jupyter->loadNotebook("");
+  //jupyter->loadNotebook("");
 }
 void MainWindow::on_jupyterFailed() {
   qDebug() << "FAILED";
@@ -614,7 +625,8 @@ void MainWindow::on_renderFinish() {
 
 void MainWindow::on_actionBack_triggered() {
   if (ui->stackedWidget->currentIndex() == HELP_TAB) {
-    ui->helpView->triggerPageAction(QWebEnginePage::Back);
+    //ui->helpView->triggerPageAction(QWebEnginePage::Back);
+    ui->helpBrowser->backward();
   } else {
     ui->stackedWidget->setCurrentIndex(IMAGE_TAB);
     if (history.size() > 0) {

@@ -21,9 +21,8 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_CXX_FLAGS -H)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAPP_VERSION=\"${PROJECT_VERSION}\" -D_CRT_SECURE_NO_WARNINGS" )
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets PrintSupport Svg)
-find_package(Qt6 REQUIRED COMPONENTS WebEngineWidgets)
-find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Widgets PrintSupport Svg Core)
+#find_package(Qt6 REQUIRED COMPONENTS WebEngineWidgets)
 
 qt_standard_project_setup()
 
@@ -130,8 +129,8 @@ if(APPLE)
     target_sources(It PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/icon.icns")
 endif()
 
-target_link_libraries(It PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::PrintSupport Qt6::Svg Qt6::WebEngineWidgets)
-target_link_libraries(It PRIVATE Qt6::Core)
+target_link_libraries(It PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::PrintSupport Qt6::Svg Qt6::Core)
+#target_link_libraries(It PRIVATE Qt6::WebEngineWidgets)
 
 include(GNUInstallDirs)
 install(TARGETS It
