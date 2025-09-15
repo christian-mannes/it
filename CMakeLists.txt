@@ -21,6 +21,10 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_CXX_FLAGS -H)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAPP_VERSION=\"${PROJECT_VERSION}\" -D_CRT_SECURE_NO_WARNINGS" )
 
+message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+message(STATUS "CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
+message(STATUS "CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
+
 find_package(Qt6 REQUIRED COMPONENTS Widgets PrintSupport Svg Core)
 #find_package(Qt6 REQUIRED COMPONENTS WebEngineWidgets)
 
@@ -151,6 +155,7 @@ elseif(WIN32)
     )
     add_custom_command(TARGET It POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/compile_windows.bat" "${CMAKE_CURRENT_BINARY_DIR}"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/compile_windows.bat"
     )
     install(FILES ${IT_ZIP} DESTINATION .)
     install(FILES ${MAPS_ZIP} DESTINATION .)

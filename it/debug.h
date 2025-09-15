@@ -10,8 +10,8 @@ public:
   Arg();
   Arg(int i);
   Arg(unsigned int i);
-  Arg(long int i); // =int64_t
-  Arg(size_t i);
+  Arg(long long int i); // =int64_t
+  //Arg(size_t i);
   Arg(char c);
   Arg(double d);
   Arg(const char *c);

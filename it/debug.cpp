@@ -11,8 +11,8 @@ Arg Arg::none;
 Arg::Arg() { parser = 0; }
 Arg::Arg(int i) { ival = i; parser = 0; }
 Arg::Arg(unsigned int i) { ival = (int)i; parser = 0; }
-Arg::Arg(long int i) { lval = i; parser = 0; }
-Arg::Arg(size_t i) { ival = (int)i; parser = 0; }
+Arg::Arg(long long int i) { lval = i; parser = 0; }
+//Arg::Arg(size_t i) { ival = (int)i; parser = 0; }
 Arg::Arg(char c) { ival = (int)c; parser = 0; }
 Arg::Arg(double d) { dval = d; parser = 0; }
 Arg::Arg(const char *s) { cval = s; parser = 0; }

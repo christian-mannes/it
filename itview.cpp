@@ -28,6 +28,7 @@ ItView::ItView(QWidget *parent) : QWidget{parent} {
   image = nullptr;
   thumbnail = nullptr;
   thumbstate = nullptr;
+  thumbing = false;
   threadPool = QThreadPool::globalInstance();
   cores = std::max(1, QThread::idealThreadCount());
   threadPool->setMaxThreadCount(cores);
@@ -35,6 +36,7 @@ ItView::ItView(QWidget *parent) : QWidget{parent} {
   progressTimer = new QTimer(this);
   connect(progressTimer, &QTimer::timeout, this, &ItView::onProgressTimer);
   connect(this, &ItView::renderFinished, this, &ItView::onRenderFinished);
+  setFocusPolicy(Qt::StrongFocus);
   setMouseTracking(true);
   orbit = 0;
   selectionColor = QColor::fromRgbF(0.0f, 1.0f, 0.0f);
@@ -55,7 +57,6 @@ void ItView::clear() {
   points.clear();
   update();
 }
-
 
 void ItView::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
@@ -201,7 +202,7 @@ void ItView::mouseMoveEvent(QMouseEvent *event) {
         update();
       }
     }
-  } else if (Qt::ShiftModifier == QApplication::keyboardModifiers()) {
+  } else if (Qt::ShiftModifier == QApplication::keyboardModifiers() || thumbing) {
     if (function->pspace == 1) {
       if (thumbnail == nullptr) {
         thumbnail = new QImage(thumbsize, thumbsize, QImage::Format_RGB32);
@@ -218,6 +219,7 @@ void ItView::mouseMoveEvent(QMouseEvent *event) {
       update();
     }
   } else {
+    thumbing = false;
     deleteThumbnail();
   }
   if (state) {
@@ -268,11 +270,35 @@ void ItView::keyPressEvent(QKeyEvent *event) {
   } else if (keyPressed == 82) { // 82='r'
     randomizeColors();
     update();
+  } else if (event->key() == 84) { // 84='t'
+    thumbing = !thumbing;
+  } else if (event->key() == 80) { // 80='p'
+    if (function->pspace == 1) {
+      function->other->setParameter(state->X(mousex), state->Y(mousey));
+      extern MainWindow *mainWindow;
+      mainWindow->on_dspace_radio_clicked();
+    }
+    thumbing = false;
+  } else if (event->key() == 68) { // 68='d'
+    if (function->pspace == 0) {
+      extern MainWindow *mainWindow;
+      mainWindow->on_pspace_radio_clicked();
+    }
+  } else if (event->key() == Qt::Key_Shift) {
+    qDebug() << "shift down";
   } else {
     orbit = 0;
     if (state) state->ClearAnnotations();
     update();
   }
+  QWidget::keyPressEvent(event);
+}
+
+void ItView::keyReleaseEvent(QKeyEvent *event) {
+  if (event->key() == Qt::Key_Shift) {
+    qDebug() << "shift up";
+  }
+  QWidget::keyPressEvent(event);
 }
 
 ////////////////////////// Rendering Algo /////////////////////////////////////

@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QRegularExpression>
 #include <QTextBrowser>
+#include <QDesktopServices>
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "Function.h"
@@ -62,6 +63,7 @@ MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui
 
   dylib = nullptr;
   createfun = nullptr;
+  deletefun = nullptr;
 
   // New-style colormaps
   std::vector<std::string> newmaps;
@@ -408,10 +410,11 @@ void MainWindow::on_actionImage_triggered() { // show code editor
 }
 
 void MainWindow::on_actionHelp_triggered() { // show help
-  ui->stackedWidget->setCurrentIndex(HELP_TAB);
+  QDesktopServices::openUrl(QUrl("https://github.com/christian-mannes/it/blob/main/README.md"));
+  //ui->stackedWidget->setCurrentIndex(HELP_TAB);
   //ui->helpView->load(QUrl("https://mannes-tech.com/It/manual.html"));
-  ui->helpBrowser->setHtml("<h1>Hi</h1><p>this</p>");
-  //ui->helpBrowser->setSource(QUrl("https://mannes-tech.com/It/manual.html"));
+  //ui->helpBrowser->setHtml("<h1>Hi</h1><p>this</p>");
+  //ui->helpBrowser->setSource(QUrl("https://mannes-tech.com/It/manual.html")); // no, only local
 }
 
 void MainWindow::on_actionNotebook_triggered() { // show notebook
@@ -511,7 +514,7 @@ void MainWindow::treeItemDoubleClicked(TreeItem* item) {
   // double clicking just starts editing/renaming, ignore
 }
 void MainWindow::treeSelectionChanged(TreeItem* current, TreeItem* previous) {
-  qDebug() << "selection" << previous->displayName() << "==>" << current->displayName();
+  qDebug() << "change function:" << previous->displayName() << "==>" << current->displayName();
   if (current) {
     QString name = current->displayName();
     if (current->isItem()) {
@@ -562,6 +565,8 @@ void MainWindow::on_pspace_radio_clicked() {
     showDefaultCoordinates();
     paramsmodel->setFunction(function);
     ui->paramsTableView->show();
+    ui->dspace_radio->setChecked(false);
+    ui->pspace_radio->setChecked(true);
     if (state) state->function = function;
   }
 }
@@ -571,6 +576,8 @@ void MainWindow::on_dspace_radio_clicked() {
     showDefaultCoordinates();
     paramsmodel->setFunction(function);
     ui->paramsTableView->show();
+    ui->dspace_radio->setChecked(true);
+    ui->pspace_radio->setChecked(false);
     if (state) state->function = function;
   }
 }
@@ -653,6 +660,7 @@ void MainWindow::start() {
   ui->itView->startRender(function, state, colormap);
   ui->actionStop->setEnabled(false);
   ui->debugView->hide();
+  ui->itView->setFocus();
 }
 
 void MainWindow::on_thumb_slider_actionTriggered(int action) {
@@ -869,8 +877,15 @@ void MainWindow::setFunction(const QString &newFunction, bool thenStart) {
   history.clear();
 
   if (function != nullptr) {
-    delete function->other;
-    delete function;
+    if (deletefun) {
+      deletefun(function->other);
+      deletefun(function);
+      createfun = nullptr;
+      deletefun = nullptr;
+    } else {
+      delete function->other;
+      delete function;
+    }
     function = nullptr;
   }
   if (dylib != nullptr) {
@@ -903,6 +918,7 @@ void MainWindow::setFunction(const QString &newFunction, bool thenStart) {
   }
 
   // Compile and load from callback (async)
+  statusBar()->showMessage("Compiling...");
   QTimer::singleShot(0, this, [this,fname,builtin_,thenStart]() {
     if (!compileAndLoad(fname, builtin_, thenStart)) {
       QMessageBox msgBox;
@@ -975,8 +991,12 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
       qDebug() << "Compiled ok";
       dylib = new QLibrary(lib);
       if (dylib->load()) {
+        //  typedef void (*DestroyFunctionPtr)(void*);
+        //  DestroyFunctionPtr destroyFunction = (DestroyFunctionPtr)dylib->resolve("_destroyFunction");
         createfun = (CreateFunction)dylib->resolve("_createFunction");
+        deletefun = (DeleteFunction)dylib->resolve("_deleteFunction");
         if (createfun == nullptr) { qDebug() << "Could not resolve function"; return false; }
+        if (deletefun == nullptr) { qDebug() << "Could not resolve function"; return false; }
         function = createfun(1); // param space first
         function->other = createfun(0); // dyn space is other
         function->other->other = function;
@@ -998,10 +1018,8 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
       return false;
     }
   }
-
   function->defaults();
   function->other->defaults();
-
   int pspace = ui->pspace_radio->isChecked() ? 1 : 0;
   if (function->pspace != pspace) function = function->other;
 
@@ -1028,7 +1046,10 @@ void MainWindow::on_actionCheat_Sheet_triggered() {
       "<li>Left click inside selection: move selection</li>"
       "<li>Left click outside selection: clear selection</li>"
       "<li>Mouse wheel down: zoom in (click to reset)</li>"
-      "<li>Shift-left-drag: thumbnail (in parameter space only)</li>"
+      "<li>Shift-left-drag: thumbnail (parameter space, Mac/Linux)</li>"
+      "<li>Key T: thumbnail on/off (parameter space)</li>"
+      "<li>Key D: goto dynamical space</li>"
+      "<li>Key P: set mouse position as parameter, goto parameter space</li>"
       "<li>Alt-left-drag: draw </li>"
       "<li>Keys 1-9: set orbit length</li>"
       "<li>Key 0: reset orbit</li>"

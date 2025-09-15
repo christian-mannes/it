@@ -17,7 +17,7 @@ class Jupyter;
 class QLibrary;
 class SyntaxHighlighterCPP;
 typedef Function *(*CreateFunction)(int pspace);
-typedef void (*DestroyFunction)(void);
+typedef void (*DeleteFunction)(void*);
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -92,6 +92,7 @@ private:
 
   QLibrary *dylib;
   CreateFunction createfun;
+  DeleteFunction deletefun;
 
   TreeModel *initFunctionList();
   void start();

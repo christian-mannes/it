@@ -25,11 +25,18 @@ if "%EXE%"=="" set EXE=%USERPROFILE%\Code\it3\build\Debug\It.exe
 REM Determine architecture
 if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
     set ARCH=x64
+    set VCVARS_ARCH=x64
 ) else if "%PROCESSOR_ARCHITEW6432%"=="AMD64" (
     set ARCH=x64
+    set VCVARS_ARCH=x64
+) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+    set ARCH=ARM64
+    set VCVARS_ARCH=arm64
 ) else (
     set ARCH=x86
+    set VCVARS_ARCH=x86
 )
+echo "%PROCESSOR_ARCHITECTURE% -> %ARCH%"
 
 REM Find and initialize Visual Studio
 set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -38,7 +45,12 @@ if exist "%VSWHERE%" (
         set "VSINSTALLPATH=%%i"
     )
     if defined VSINSTALLPATH (
-        call "!VSINSTALLPATH!\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1
+        if "%ARCH%"=="ARM64" (
+        echo "Using all %VCVARS_ARCH%"
+            call "!VSINSTALLPATH!\VC\Auxiliary\Build\vcvarsall.bat" !VCVARS_ARCH! >nul 2>&1
+        ) else (
+            call "!VSINSTALLPATH!\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1
+        )
     )
 )
 
@@ -52,9 +64,17 @@ if errorlevel 1 (
 )
 
 REM Compiler settings
-set CPPFLAGS=/std:c++17 /EHsc /MD /Zi /D WIN32 /D _WINDOWS /D _USRDLL /FC /D_CRT_SECURE_NO_WARNINGS
+
+REM CMAKE_CXX_FLAGS: -DQT_QML_DEBUG /DWIN32 /D_WINDOWS /W3 /GR /EHsc -DAPP_VERSION="3.0.1" -D_CRT_SECURE_NO_WARNINGS
+REM CMAKE_CXX_FLAGS_DEBUG: /MDd /Zi /Ob0 /Od /RTC1
+REM CMAKE_CXX_FLAGS_RELEASE: /MD /O2 /Ob2 /DNDEBUG
+
+REM set CPPFLAGS=/std:c++17 /nologo /EHsc /MD /Zi /D WIN32 /D _WINDOWS /D _USRDLL /FC /D_CRT_SECURE_NO_WARNINGS /GR
+set CPPFLAGS=/std:c++17 /nologo /DWIN32 /D_WINDOWS /W3 /GR /EHsc -D_CRT_SECURE_NO_WARNINGS /MDd /Zi /Ob0 /Od /RTC1
+REM set CPPFLAGS=/std:c++17 /nologo /DWIN32 /D_WINDOWS /W3 /GR /EHsc -D_CRT_SECURE_NO_WARNINGS /MD /O2 /Ob2 /DNDEBUG
 set IFLAGS=/I..\it
-set LFLAGS=/DLL /MACHINE:%ARCH% /VERBOSE
+set LFLAGS=/DLL /MACHINE:%ARCH% /VERBOSE /nologo
+REM set LFLAGS=/DLL /VERBOSE /nologo
 
 echo Using Visual Studio compiler
 echo.
@@ -134,8 +154,8 @@ REM Add the extern C function to ITFUN.cpp
 (
     type ITFUN_temp.cpp
     echo.
-    rem echo extern "C" __declspec^(dllexport^) void *_createFunction^(int pspace^) { return new %CLASSNAME%^("%CLASSNAME%", "label", pspace^); }
-    echo extern "C" __declspec^(dllexport^) void * __cdecl _createFunction^(int pspace^) { static %CLASSNAME% instance^("%CLASSNAME%", "label", pspace^); return ^&instance; }
+    echo extern "C" __declspec^(dllexport^) void *_createFunction^(int pspace^) { return new %CLASSNAME%^("%CLASSNAME%", "label", pspace^); }
+    echo extern "C" __declspec^(dllexport^) void _deleteFunction^(void *fun^) { delete ^(%CLASSNAME% *^)fun; }
 ) > ITFUN.cpp
 del ITFUN_temp.cpp
 

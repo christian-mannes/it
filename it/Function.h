@@ -56,6 +56,7 @@
 #define SETCOLOR(i,r,g,b) state->setColor(i,r,g,b)
 
 #define CLASS(CN, LBL) class CN : public Function
+#define WCLASS(CN, LBL) class __declspec(dllexport) CN : public Function
 #ifdef ABS
 #undef ABS
 #endif

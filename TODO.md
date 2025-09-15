@@ -47,14 +47,16 @@
     - [X] Readme becomes web page
     - [X] Proper readme / introduction
     - [X] Include manual / web page
-    - [ ] Add DMG to repo
-    - [ ] Make repo public
+    - [X] Add DMG to repo
+    - [X] Make repo public
     
-- [ ] Show code for samples (read only)
+- [X] Show code for samples (read only)
 - [ ] Link for manual -> github version
 
 - [X] MacOS packaging/signing/DMG
 - [ ] Windows version
+    - [ ] Debug/release in build script
+
 - [ ] Linux version
 
 
@@ -422,3 +424,4 @@ public:
 };
 
 ```
+compile_windows.bat test "C:/Users/christ/AppData/Roaming/Mannes Technology/It/" "C:/Users/christ/Code/it/build/Desktop_Qt_6_10_0_MSVC2022_ARM64-Debug/It.exe"

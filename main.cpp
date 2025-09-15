@@ -1,3 +1,12 @@
+
+#ifdef _WIN32
+#include <windows.h>
+#include <io.h>
+#include <fcntl.h>
+#include <iostream>
+#include <stdio.h>
+#endif
+
 #include <QApplication>
 #include <QDir>
 #include <QDebug>
@@ -8,6 +17,16 @@
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
+#ifdef _WIN32
+    if (AllocConsole()) {
+      freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+      freopen_s((FILE**)stderr, "CONOUT$", "w", stderr);
+      freopen_s((FILE**)stdin, "CONIN$", "r", stdin);
+      std::cout.clear();
+      std::cerr.clear();
+      std::cin.clear();
+  }
+#endif
 #ifdef _DEBUG
     qDebug() << "Qt app using DEBUG runtime";
 #else

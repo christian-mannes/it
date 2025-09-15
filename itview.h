@@ -36,6 +36,7 @@ protected:
   void mouseMoveEvent(QMouseEvent *event) override;
   void wheelEvent(QWheelEvent *event) override;
   void keyPressEvent(QKeyEvent *event) override;
+  void keyReleaseEvent(QKeyEvent *event) override;
 public:
   bool annotate;
   bool sandbox;
@@ -80,6 +81,7 @@ private:
   int orbit;
   int mousex;
   int mousey;
+  bool thumbing;
   double zoom;
   QPointF pan;
   QList<QPoint> points;
