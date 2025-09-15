@@ -951,6 +951,7 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
   qDebug() << "compileAndLoad" << fname; // pass fname2file(fname)
   if (builtin_) {
     function = createBuiltinFunction(currFunction.toStdString());
+    codeHasChanged = false;
   } else {
     // TODO: directories on other platforms
     QString file = filesDirectory + fname + ".cpp";
