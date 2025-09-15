@@ -1,17 +1,15 @@
 #ifndef JUPYTER_H
 #define JUPYTER_H
 
-#if 0
 #include <QObject>
 #include <QProcess>
-#include <QWebEngineView>
-#include <QNetworkAccessManager>
+class QNetworkAccessManager;
 
 class Jupyter : public QObject {
   Q_OBJECT
 
 public:
-  explicit Jupyter(QWebEngineView *v, QObject *parent_ = nullptr);
+  explicit Jupyter(QObject *parent_ = nullptr);
 
   void startServer(const QString &notebookDir = QString());
   void stopServer();
@@ -28,12 +26,11 @@ private slots:
   void checkServerReady();
 
 private:
-  QWebEngineView *webView;
   QProcess *jupyterProcess;
   QNetworkAccessManager *networkManager;
 };
 
 QString findJupyterPath();
 bool isJupyterAvailable();
-#endif
+
 #endif // JUPYTER_H

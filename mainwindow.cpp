@@ -18,7 +18,7 @@
 #include "Function.h"
 #include "paramsmodel.h"
 #include "syntaxhighlightercpp.h"
-//#include "jupyter.h"
+#include "jupyter.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -136,12 +136,19 @@ MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui
     ui->actionShow_Functions->setIcon(QIcon(":/icons/dark/folder-outline.svg"));
   }
 
+#ifdef Q_OS_APPLE
+  resourceDirectory = QApplication::applicationDirPath() + "/../Resources/";
+#else // Windows
+  resourceDirectory = QApplication::applicationDirPath() + "/";
+#endif
+
   QTimer::singleShot(0, this, [this]() { // post-ui
     postInit();
   });
 }
 
 MainWindow::~MainWindow() {
+  if (jupyter != nullptr) jupyter->stopServer();
   delete ui;
   delete highlighter;
 }
@@ -265,7 +272,6 @@ void MainWindow::firstTimeUseWin(bool acceptLegacy) {
     qDebug() << "app data dir created";
   }
   if (!filesDirectory.endsWith("/")) filesDirectory += "/";
-  resourceDirectory = QApplication::applicationDirPath() + "/";
   qDebug() << "filesDirectory:" << filesDirectory;
 
   // Install color maps
@@ -318,8 +324,6 @@ void MainWindow::firstTimeUseWin(bool acceptLegacy) {
 void MainWindow::firstTimeUseMac(bool acceptLegacy) {
 #ifdef Q_OS_APPLE
   // Do we have the legacy directory ~/Library/Application Support/It ?
-  resourceDirectory = QApplication::applicationDirPath() + "/../Resources/";
-
   QString legacyPath = QDir::homePath() + "/Library/Application Support/It";
   QDir legacyDir(legacyPath);
   bool doPrompt = true;
@@ -418,9 +422,8 @@ void MainWindow::on_actionHelp_triggered() { // show help
 }
 
 void MainWindow::on_actionNotebook_triggered() { // show notebook
-#if 0
   if (jupyter == nullptr) {
-    jupyter = new Jupyter(ui->notebookView, this);
+    jupyter = new Jupyter(this);
     jupyter->startServer(filesDirectory + "notebooks");
     connect(jupyter, &Jupyter::serverReady, this, &MainWindow::on_jupyterReady);
     connect(jupyter, &Jupyter::serverFailed, this, &MainWindow::on_jupyterFailed);
@@ -429,11 +432,10 @@ void MainWindow::on_actionNotebook_triggered() { // show notebook
     ui->stackedWidget->setCurrentIndex(NOTEBOOK_TAB);
     jupyter->loadNotebook("");
   }
-#endif
 }
 void MainWindow::on_jupyterReady() {
   qDebug() << "READY";
-  //jupyter->loadNotebook("");
+  jupyter->loadNotebook("");
 }
 void MainWindow::on_jupyterFailed() {
   qDebug() << "FAILED";

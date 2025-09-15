@@ -1,9 +1,10 @@
+
 #include "jupyter.h"
-#if 0
-#include <QNetworkReply>
-#include <QRegularExpression>
 #include <QTimer>
 #include <QDir>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QDesktopServices>
 
 QString findJupyterPath() {
   QStringList possiblePaths = {
@@ -31,7 +32,7 @@ bool isJupyterAvailable() {
   return process.exitCode() == 0;
 }
 
-Jupyter::Jupyter(QWebEngineView *webView_, QObject *parent_) : QObject(parent_), webView(webView_) {
+Jupyter::Jupyter(QObject *parent_) : QObject(parent_) {
   jupyterProcess = nullptr;
   networkManager = new QNetworkAccessManager(this);
 }
@@ -92,7 +93,8 @@ void Jupyter::loadNotebook(const QString &notebookPath) {
   if (!notebookPath.isEmpty()) {
     url += "/tree/" + notebookPath;
   }
-  webView->load(QUrl(url));
+  QDesktopServices::openUrl(QUrl(url));
+  //webView->load(QUrl(url));
 }
 
 void Jupyter::onJupyterOutput() {
@@ -127,4 +129,4 @@ void Jupyter::checkServerReady() {
     reply->deleteLater();
   });
 }
-#endif
+

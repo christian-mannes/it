@@ -42,8 +42,7 @@
 - [X] Randomize colors (R -> drawing colors)
 - [X] Need two save/compile to fix an error (runs wrong version?)
 - [X] Put when to compile in code, compile unconditionally
-
-- [ ] Github
+- [X] Github
     - [X] Readme becomes web page
     - [X] Proper readme / introduction
     - [X] Include manual / web page
@@ -51,15 +50,16 @@
     - [X] Make repo public
     
 - [X] Show code for samples (read only)
-- [ ] Link for manual -> github version
+- [X] Link for manual -> github version
+- [ ] Open Jupyter in browser (not webview)
 
 - [X] MacOS packaging/signing/DMG
 - [ ] Windows version
     - [ ] Debug/release in build script
+    - [ ] Test on x86
+    
 
 - [ ] Linux version
-
-
 
 - [ ] Check all of Nuria's files
 - [ ] Get better colormaps (3D effect?)

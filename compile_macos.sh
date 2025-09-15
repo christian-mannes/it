@@ -61,12 +61,13 @@ cat <<PREFIX > prefix.txt
 PREFIX
 fi
 
-
 #if [ ! -a "$1.dylib" -o "../$1.cpp" -nt "$1.dylib" ]; then
   cat prefix.txt "../$1.cpp" > ITFUN.cpp
   CLASSNAME=`grep -o 'CLASS([^,]*' ITFUN.cpp | sed s/CLASS\(//`
-  POSTFIX="extern \"C\" void *_createFunction(int pspace) { return new ${CLASSNAME}(\"${CLASSNAME}\", \"label\", pspace); }"
-  echo $POSTFIX >> ITFUN.cpp
+  POSTFIX1="extern \"C\" void *_createFunction(int pspace) { return new ${CLASSNAME}(\"${CLASSNAME}\", \"label\", pspace); }"
+  POSTFIX2="extern \"C\" void _deleteFunction(void *f) { delete (${CLASSNAME} *)f; }"
+  echo $POSTFIX1 >> ITFUN.cpp
+  echo $POSTFIX2 >> ITFUN.cpp
   $COMPILE -c ITFUN.cpp -o ITFUN.o >> errors.txt 2>&1
 #fi
 

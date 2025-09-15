@@ -25,7 +25,7 @@ message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message(STATUS "CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
 message(STATUS "CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets PrintSupport Svg Core)
+find_package(Qt6 REQUIRED COMPONENTS Widgets PrintSupport Svg Core Network)
 #find_package(Qt6 REQUIRED COMPONENTS WebEngineWidgets)
 
 qt_standard_project_setup()
@@ -164,7 +164,7 @@ elseif(WIN32)
     install(FILES builtin_mandi.txt DESTINATION .)
 endif()
 
-target_link_libraries(It PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::PrintSupport Qt6::Svg Qt6::Core)
+target_link_libraries(It PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::PrintSupport Qt6::Svg Qt6::Core Qt6::Network)
 #target_link_libraries(It PRIVATE Qt6::WebEngineWidgets)
 
 include(GNUInstallDirs)
