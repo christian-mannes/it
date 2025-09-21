@@ -73,6 +73,7 @@ qt_add_executable(It
     doc/download.md doc/manual.md
     builtin_mandi.txt
     compile_windows.bat
+    app-icon.rc
 )
 
 file(GLOB_RECURSE IT_SOURCES "${CMAKE_SOURCE_DIR}/it/*")
@@ -133,6 +134,8 @@ if(APPLE)
     )
     target_sources(It PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/icon.icns")
 elseif(WIN32)
+    set_target_properties(It PROPERTIES WIN32_EXECUTABLE TRUE)
+    target_sources(It PRIVATE app-icon.rc)
     add_custom_command(TARGET It POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${IT_ZIP} --format=zip it
         DEPENDS ${IT_SOURCES}

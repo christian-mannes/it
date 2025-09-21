@@ -56,7 +56,9 @@ int main(int argc, char *argv[]) {
   a.setApplicationDisplayName("It");
   a.setApplicationVersion("3.0");
   a.setOrganizationName("Mannes Technology");
-
+#ifdef Q_OS_WIN
+  app.setWindowIcon(QIcon(":/icons/icon.ico"))
+#endif
   bool isDarkMode = a.styleHints()->colorScheme() == Qt::ColorScheme::Dark;
   if (isDarkMode) {
     a.setStyle("Fusion");

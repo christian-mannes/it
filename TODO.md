@@ -43,33 +43,42 @@
 - [X] Need two save/compile to fix an error (runs wrong version?)
 - [X] Put when to compile in code, compile unconditionally
 - [X] Github
-    - [X] Readme becomes web page
-    - [X] Proper readme / introduction
-    - [X] Include manual / web page
-    - [X] Add DMG to repo
-    - [X] Make repo public
-    
 - [X] Show code for samples (read only)
 - [X] Link for manual -> github version
-- [ ] Open Jupyter in browser (not webview)
+- [X] Open Jupyter in browser (not webview)
+- [X] MacOS packaging/signing/DMG -- approx Sep 10
+-- 20/09/2025 Bugs ------------------------------------------------------------
+- [X] RGB: return rgb(int,int,int)
+- [X] Artifacts with multithreading z^4+a/z^4, z^2*(z-a), a(exp(z)-1)
+- [X] a(exp(z)-1): enable debug-> multithreading artifacts
+- [X] Error window doesn't go away
+- [X] Stop button not working
+- [X] Stopping when single threaded
+- [X] Better indication of when running
+- [X] Pick place in dspace, go back: coordinates bad
+- [X] Esc to reset zoom/exit whatever (like clicking)
+-------------------------------------------------------------------------------
 
-- [X] MacOS packaging/signing/DMG
+- [ ] Custom colormap in code
+- [ ] Bookmark places
+- [ ] Update help files / web page
+
 - [ ] Windows version
     - [ ] Debug/release in build script
     - [ ] Test on x86
+    - [ ] Icon
     
-
 - [ ] Linux version
 
-- [ ] Check all of Nuria's files
+
+-- Release --------------------------------------------------------------------
+- [ ] Change icon
+- [ ] Check all of Nuria's files (now in ~/It)
+- [ ] Update manual
 - [ ] Get better colormaps (3D effect?)
 - [ ] A few built-in functions
-- [ ] Bookmark places (complete param set)
-- [ ] Add your own colormap
-- [ ] Customize appearance treeview/branch 
 
-- [ ] App store
-- [ ] Qt showcase
+- [ ] Qt showcase (app store?)
 
 ---Help------------------------------------------------------------------------
 - [X] About menu (prepared, see Claude)
@@ -78,9 +87,13 @@
 - [ ] New screenshots (in dark mode, too)
 - [ ] Add how to debug
 - [ ] Add how to find and fix errors
+- [ ] Good and bad functions: thread-safety
 
 ---Ideas-----------------------------------------------------------------------
 - [ ] Compute servers (other copies)
+- [ ] Automatic copy function - new style functions 
+
+
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------

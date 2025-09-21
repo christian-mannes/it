@@ -284,6 +284,13 @@ void ItView::keyPressEvent(QKeyEvent *event) {
       extern MainWindow *mainWindow;
       mainWindow->on_pspace_radio_clicked();
     }
+  } else if (event->key() == Qt::Key_Escape) { // escape
+    zoom = 1.0;
+    pan = QPoint(0, 0);
+    selecting = 0;
+    selection.setSize(QSize(0, 0));
+    points.clear();
+    update();
   } else if (event->key() == Qt::Key_Shift) {
     qDebug() << "shift down";
   } else {
@@ -357,9 +364,10 @@ void ItView::startRender(Function *function_, State *state_, Colormap *colormap_
   function->start(debug);
 
   if (singlethreaded) {
-    Tile tile(this, 0, 0, w, h, function->copy_());
-    tile.phase = 4; // calc all directly
-    renderTile(&tile);
+    Tile *tile = new Tile(this, 0, 0, w, h, function->copy_());
+    tile->phase = 4; // calc all directly
+    //renderTile(tile);
+    threadPool->start(tile);
   } else {
 #if 0 // STRIPES
     int th = h / cores;
@@ -403,7 +411,9 @@ void ItView::stopRender() {
   if (!rendering.load()) return;
   rendering = false;
   progressTimer->stop();
+  qDebug() << "Stopping...";
   threadPool->waitForDone();
+  qDebug() << "Stopped";
   for (Tile *tile: tiles) delete tile; tiles.clear();
   map();
   update();
@@ -431,6 +441,8 @@ void ItView::onRenderFinished() {
 // |   |   |
 // +---+---+
 void ItView::renderTile(Tile *tile) {
+  int pp;
+  if (!rendering.load()) return;
   if (tile->phase == 0) {
     double pix = tile->fun->iterate_(state->X(tile->x), state->Y(tile->y));
     state->setPixelRegion(tile->x, tile->y, pix, tile->w, tile->h);
@@ -454,15 +466,17 @@ void ItView::renderTile(Tile *tile) {
     state->setPixelRegion(x, y, tile->fun->iterate_(state->X(x), state->Y(y)), w, h);
   } else { // final phase 4
     for (int y = tile->y; y < tile->y + tile->h; y++) {
+      if (!rendering.load()) return;
       int idx = state->getPixelIndex(tile->x, y);
       for (int x = tile->x; x < tile->x + tile->w; x++) {
         if (!state->isSetAt(idx))
           state->setPixelAt(idx, tile->fun->iterate_(state->X(x), state->Y(y)));
-        //QObject().thread()->usleep(50); // slow down
+        //QObject().thread()->usleep(100); // slow down
         idx++;
       }
+      pp = pendingPixels.fetch_sub(tile->w) - tile->w;
     }
-    int pp = pendingPixels.fetch_sub(tile->size()) - tile->size();
+    //int pp = pendingPixels.load(); //fetch_sub(tile->size()) - tile->size();
     //qDebug() << "renderTile" << tile->x << tile->y << tile->w << tile->h << "FULL" << pp;
     if (pp == 0) {
       emit renderFinished();

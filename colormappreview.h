@@ -11,6 +11,7 @@ class ColormapPreview : public QWidget
 public:
   explicit ColormapPreview(QWidget *parent = nullptr);
   void setColormap(Colormap *m);
+  void setProgress(int p);
 protected:
   void paintEvent(QPaintEvent *event) override;
 
@@ -20,6 +21,7 @@ private:
   Colormap *colormap;
   QImage *image;
   bool dirty;
+  int progress;
 };
 
 #endif // COLORMAPPREVIEW_H

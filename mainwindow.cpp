@@ -85,6 +85,7 @@ MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui
 
   ui->itView->setFocus();
   connect(ui->itView, &ItView::renderFinished, this, &MainWindow::on_renderFinish);
+  connect(ui->itView, &ItView::progressUpdated, this, &MainWindow::on_renderProgress);
 
   // Code editor/errors
   codeHasChanged = false;
@@ -148,6 +149,7 @@ MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui
 }
 
 MainWindow::~MainWindow() {
+  ui->itView->stopRender();
   if (jupyter != nullptr) jupyter->stopServer();
   delete ui;
   delete highlighter;
@@ -660,9 +662,10 @@ void MainWindow::start() {
   ui->itView->sandbox = ui->sandbox_cb->isChecked();
 
   ui->itView->startRender(function, state, colormap);
-  ui->actionStop->setEnabled(false);
+  ui->actionStop->setEnabled(true);
   ui->debugView->hide();
   ui->itView->setFocus();
+  ui->actionStart->setEnabled(false);
 }
 
 void MainWindow::on_thumb_slider_actionTriggered(int action) {
@@ -674,9 +677,17 @@ void MainWindow::on_actionStop_triggered() {
   ui->actionStop->setEnabled(false);
   ui->actionBack->setEnabled(history.size() > 0);
   statusBar()->showMessage("Stopped.");
+  ui->preview->setProgress(100);
+  ui->actionStart->setEnabled(true);
+}
+
+void MainWindow::on_renderProgress(int p) {
+  ui->preview->setProgress(p);
 }
 
 void MainWindow::on_renderFinish() {
+  ui->preview->setProgress(100);
+  ui->actionStart->setEnabled(true);
   ui->actionStop->setEnabled(false);
   ui->actionBack->setEnabled(history.size() > 0);
   if (ui->itView->debug) {
@@ -708,6 +719,8 @@ void MainWindow::on_actionBack_triggered() {
       ui->resolution_xres->setText(QString::number(state->xres));
       ui->resolution_yres->setText(QString::number(state->yres));
       ui->pspace_radio->setChecked(state->pspace == 1); // set other?
+      ui->dspace_radio->setChecked(state->pspace != 1); // set other?
+      if (function->pspace != state->pspace) function = function->other;
 
       state->restoreArgs(function);
       paramsmodel->setFunction(function);
@@ -989,6 +1002,7 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
       exitCode = proc.exitCode();
     } else {
       qDebug() << "No need to compile";
+      ui->errorsView->hide();
     }
     if (exitCode == 0) {
       qDebug() << "Compiled ok";
@@ -1003,6 +1017,7 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
         function = createfun(1); // param space first
         function->other = createfun(0); // dyn space is other
         function->other->other = function;
+        ui->errorsView->hide();
       } else {
         qDebug() << "Could not load: " << dylib->errorString();
       }
@@ -1049,10 +1064,10 @@ void MainWindow::on_actionCheat_Sheet_triggered() {
       "<li>Left click inside selection: move selection</li>"
       "<li>Left click outside selection: clear selection</li>"
       "<li>Mouse wheel down: zoom in (click to reset)</li>"
-      "<li>Shift-left-drag: thumbnail (parameter space, Mac/Linux)</li>"
+      "<li>Shift mouse move: thumbnail (parameter space, Mac/Linux)</li>"
       "<li>Key T: thumbnail on/off (parameter space)</li>"
-      "<li>Key D: goto dynamical space</li>"
-      "<li>Key P: set mouse position as parameter, goto parameter space</li>"
+      "<li>Key P: set mouse position as parameter, goto dynamical space</li>"
+      "<li>Key D: goto parameter space</li>"
       "<li>Alt-left-drag: draw </li>"
       "<li>Keys 1-9: set orbit length</li>"
       "<li>Key 0: reset orbit</li>"

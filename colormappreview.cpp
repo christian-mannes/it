@@ -7,6 +7,7 @@ ColormapPreview::ColormapPreview(QWidget *parent)
   colormap = nullptr;
   image = nullptr;
   dirty = true;
+  progress = 100;
 }
 
 void ColormapPreview::setColormap(Colormap *m) {
@@ -15,7 +16,20 @@ void ColormapPreview::setColormap(Colormap *m) {
   update();
 }
 
+void ColormapPreview::setProgress(int p) {
+  progress = p;
+  update();
+}
+
 void ColormapPreview::paintEvent(QPaintEvent *event) {
+  if (progress < 100) {
+    QPainter painter(this);
+    QBrush brush(QColor(0, 128, 0));
+    QRect rect(0, 0, progress * width() / 100, height());
+    painter.fillRect(rect, brush);
+    return;
+  }
+
   if (colormap == nullptr) return;
   int w = width(), h = height();
   if (image != nullptr) {

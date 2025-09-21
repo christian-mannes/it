@@ -41,6 +41,7 @@ public slots:
   void on_chooseColormap();
   void on_actionStart_triggered();
   void on_actionStop_triggered();
+  void on_renderProgress(int p);
   void on_renderFinish();
   void on_slider_res_valueChanged(int value);
   void on_resolution_xres_textChanged(const QString &arg1);
