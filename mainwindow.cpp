@@ -136,6 +136,8 @@ MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui
     ui->actionCheat_Sheet->setIcon(QIcon(":/icons/dark/help-circle-outline.svg"));
     ui->actionShow_Functions->setIcon(QIcon(":/icons/dark/folder-outline.svg"));
   }
+  //font-family: 'Menlo','Consolas', 'Monaco', 'Courier New', monospace;
+  //font-size: 14pt;
 
 #ifdef Q_OS_APPLE
   resourceDirectory = QApplication::applicationDirPath() + "/../Resources/";
@@ -163,7 +165,7 @@ void MainWindow::postInit() {
   }
 
   // Classic-style color maps (from files)
-  QString path = filesDirectory + "Maps";
+  QString path = filesDirectory + "maps";
   QDir dir(path);
   QStringList files = dir.entryList(QStringList() << "*.map", QDir::Files);
   foreach(QString filename, files) {
@@ -185,7 +187,6 @@ void MainWindow::postInit() {
   connect(treemodel, &TreeModel::itemAdded, this, &MainWindow::treeItemAdded);
   connect(treemodel, &TreeModel::itemRemoved, this, &MainWindow::treeItemRemoved);
   ui->treeView->setHeaderHidden(true);
-
 
   setColormap(currColormap);
   if (savedFunction.isEmpty()) savedFunction = DEFAULT_FUNCTION_NAME;
@@ -262,6 +263,9 @@ void MainWindow::firstTimeUse(bool acceptLegacy) {
 #endif
 #ifdef Q_OS_WIN
   firstTimeUseWin(acceptLegacy);
+#endif
+#ifdef Q_OS_LINUX
+  firstTimeUseLinux(acceptLegacy);
 #endif
 }
 void MainWindow::firstTimeUseWin(bool acceptLegacy) {
@@ -375,6 +379,82 @@ void MainWindow::firstTimeUseMac(bool acceptLegacy) {
   if (!itdir.exists() || itdir.lastModified() < exe.lastModified()) {
     qDebug() << "Installing include files";
     QString itzip = QApplication::applicationDirPath() + "/../Resources/it.zip";
+    QProcess process;
+    QStringList args;
+      args << "-o" << itzip << "-d" << filesDirectory;
+      process.start("unzip", args);
+      process.waitForFinished();
+      qDebug() << "Installed it" << (process.exitCode() == 0 ? "ok" : "FAIL");
+  }
+
+  QString nbdirpath = filesDirectory + "notebooks";
+  QFileInfo nbdir(nbdirpath);
+  if (!nbdir.exists()) {
+    QDir fd(filesDirectory);
+    fd.mkpath(nbdirpath);
+  }
+
+  QString buildpath = filesDirectory + "build";
+  QFileInfo builddir(buildpath);
+  if (!builddir.exists()) {
+    QDir fd(filesDirectory);
+    fd.mkpath(buildpath);
+  }
+#endif
+}
+
+void MainWindow::firstTimeUseLinux(bool acceptLegacy) {
+#ifdef Q_OS_LINUX
+  // Do we have the legacy directory ~/Library/Application Support/It ?
+  QString legacyPath = QDir::homePath() + "/It";
+  QDir legacyDir(legacyPath);
+  bool doPrompt = true;
+  if (legacyDir.exists() && acceptLegacy) { // use it on first time use (acceptLegacy)
+    filesDirectory = legacyPath + "/";
+    statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
+    doPrompt = false;
+  }
+  // If not, prompt user for a directory - repeat until we have one
+  if (doPrompt) {
+    QMessageBox msgBox;
+    msgBox.setText("Please select a directory for your function files");
+    msgBox.exec();
+    while (true) {
+      filesDirectory = QFileDialog::getExistingDirectory(this,
+          "Please select a directory for your function files",
+          QDir::homePath());
+      if (filesDirectory.isEmpty()) {
+        QMessageBox msgBox;
+        msgBox.setText("You must select a directory for your function files");
+        msgBox.exec();
+      } else {
+        filesDirectory += "/";
+        saveSettings();
+        break;
+      }
+    }
+  }
+  statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
+
+  // Install color maps
+  QFileInfo exe(QApplication::applicationDirPath() + "/It");
+  QFileInfo mapsdir(filesDirectory + "maps");
+  if (!mapsdir.exists() || mapsdir.lastModified() < exe.lastModified()) {
+    qDebug() << "Installing maps";
+    QString mapszip = QApplication::applicationDirPath() + "/maps.zip";
+    QProcess process;
+    QStringList args;
+    args << "-o" << mapszip << "-d" << filesDirectory;
+    process.start("unzip", args);
+    process.waitForFinished();
+    qDebug() << "Installed maps" << (process.exitCode() == 0 ? "ok" : "FAIL");
+  }
+
+  // Install include files for compilation
+  QFileInfo itdir(filesDirectory + "it");
+  if (!itdir.exists() || itdir.lastModified() < exe.lastModified()) {
+    qDebug() << "Installing include files";
+    QString itzip = QApplication::applicationDirPath() + "/it.zip";
     QProcess process;
     QStringList args;
       args << "-o" << itzip << "-d" << filesDirectory;
@@ -788,7 +868,7 @@ void MainWindow::setColormap(const QString &name) {
   if (colormap == nullptr) {
     colormap = new Colormap();
     //QString path = QDir::homePath() + "/Library/Application Support/It/Maps/" + currColormap;
-    QString path = filesDirectory + "Maps/" + currColormap;
+    QString path = filesDirectory + "maps/" + currColormap;
     colormap->load(path.toStdString());
   }
   ui->preview->setColormap(colormap);
@@ -904,7 +984,11 @@ void MainWindow::setFunction(const QString &newFunction, bool thenStart) {
     function = nullptr;
   }
   if (dylib != nullptr) {
+#ifdef Q_OS_LINUX
+    while (dylib->isLoaded()) dylib->unload();
+#else
     dylib->unload();
+#endif
     dylib = nullptr;
   }
 
@@ -968,6 +1052,7 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
   } else {
     // TODO: directories on other platforms
     QString file = filesDirectory + fname + ".cpp";
+    int version = 0;
   #ifdef Q_OS_MACOS
     QString lib = filesDirectory + "build/" + fname + ".dylib";
     QString exe = QApplication::applicationDirPath() + "/It";
@@ -979,6 +1064,18 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
     QString exe = QApplication::applicationDirPath() + "/It.exe";
     QString comp = QApplication::applicationDirPath() + "/compile_windows.bat";
     QString cmd = "cmd.exe";
+  #endif
+  #ifdef Q_OS_LINUX
+    if (ver.contains(fname)) {
+      version = ver[fname] + 1;
+    } else {
+      version = 1;
+    }
+    ver[fname] = version;
+    QString lib = filesDirectory + "build/" + fname + QString::number(version) + ".so";
+    QString exe = QApplication::applicationDirPath() + "/It";
+    QString comp = QApplication::applicationDirPath() + "/compile_linux.sh";
+    QString cmd = "bash";
   #endif
 
     QFileInfo fileinfo(file);
@@ -995,7 +1092,7 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
   #ifdef Q_OS_WIN
       args << "/c";
   #endif
-      args << comp << fname << filesDirectory << exe;
+      args << comp << fname << filesDirectory << exe << "NOCLEAR" << QString::number(version);
       qDebug() << "Will compile:" << cmd << args;
       proc.start(cmd, args);
       proc.waitForFinished();

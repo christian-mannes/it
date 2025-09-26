@@ -14,6 +14,7 @@
 
 *************************************************************************/
 #include <cmath>
+#include <cstdint>
 #include <algorithm>
 #include <stdio.h>
 #include "Colormap.h"

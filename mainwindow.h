@@ -88,10 +88,12 @@ private:
   void firstTimeUse(bool acceptLegacy);
   void firstTimeUseMac(bool acceptLegacy);
   void firstTimeUseWin(bool acceptLegacy);
+  void firstTimeUseLinux(bool acceptLegacy);
 
   SyntaxHighlighterCPP *highlighter;
 
   QLibrary *dylib;
+  QMap<QString,int> ver;
   CreateFunction createfun;
   DeleteFunction deletefun;
 
