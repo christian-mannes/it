@@ -59,6 +59,14 @@ int main(int argc, char *argv[]) {
 #ifdef Q_OS_WIN
   app.setWindowIcon(QIcon(":/icons/icon.ico"))
 #endif
+#ifdef Q_OS_LINUX
+  QIcon appIcon;
+  appIcon.addFile(":/icons/icon_16x16.png", QSize(16,16));
+  appIcon.addFile(":/icons/icon_32x32.png", QSize(32,32));
+  appIcon.addFile(":/icons/icon_48x48.png", QSize(48,48));
+  appIcon.addFile(":/icons/icon_64x64.png", QSize(64,64));
+  app.setWindowIcon(appIcon);
+#endif
   bool isDarkMode = a.styleHints()->colorScheme() == Qt::ColorScheme::Dark;
   if (isDarkMode) {
     a.setStyle("Fusion");

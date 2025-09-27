@@ -35,5 +35,9 @@
         <file>icons/dark/arrow-back-outline.svg</file>
         <file>icons/dark/close-outline.svg</file>
         <file>icons/dark/play-outline.svg</file>
+        <file>icons/icon_64x64.png</file>
+        <file>icons/icon.ico</file>
+        <file>icons/icon_48x48.png</file>
+        <file>icons/icon_32x32.png</file>
     </qresource>
 </RCC>
