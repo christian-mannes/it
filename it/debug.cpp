@@ -1,5 +1,7 @@
 #include "debug.h"
 #include <stdexcept>
+#include <string.h>
+#include <math.h>
 using namespace std;
 
 bool parse_int(const char *str, int n, void *dest);

@@ -98,15 +98,15 @@
               <property name="font">
                <font>
                 <family>Menlo</family>
-                <pointsize>14</pointsize>
+                <pointsize>13</pointsize>
                </font>
               </property>
               <property name="styleSheet">
                <string notr="true">    QPlainTextEdit {
         background-color: #1e1e1e;
         color: #d4d4d4;
-        font-family: 'Menlo','Consolas', 'Monaco', 'Courier New', monospace;
-        font-size: 14pt;
+        font-family: 'Menlo','Consolas', 'DejaVu Sans Mono', 'Liberation Mono',monospace;
+        font-size: 13pt;
         border: 1px solid #3c3c3c;
         selection-background-color: #264f78;
         selection-color: #ffffff;
@@ -276,8 +276,8 @@
               <widget class="ItView" name="itView">
                <property name="geometry">
                 <rect>
-                 <x>203</x>
-                 <y>162</y>
+                 <x>0</x>
+                 <y>0</y>
                  <width>100</width>
                  <height>100</height>
                 </rect>
@@ -412,7 +412,7 @@
     <item>
      <layout class="QVBoxLayout" name="sidePanelLayout">
       <property name="spacing">
-       <number>-1</number>
+       <number>6</number>
       </property>
       <property name="bottomMargin">
        <number>0</number>
@@ -926,7 +926,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>24</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

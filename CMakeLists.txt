@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(It VERSION 3.0.1 LANGUAGES CXX)
+project(It VERSION 4.0.2 LANGUAGES CXX)
 
 if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64") # Fat binaries
@@ -74,6 +74,7 @@ qt_add_executable(It
     builtin_mandi.txt
     compile_windows.bat
     app-icon.rc
+    compile_linux.sh
 )
 
 file(GLOB_RECURSE IT_SOURCES "${CMAKE_SOURCE_DIR}/it/*")
@@ -109,7 +110,6 @@ if(APPLE)
     set_source_files_properties(${IT_ZIP} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE ${MAPS_ZIP})
     set_source_files_properties(${MAPS_ZIP} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-
 
     set_target_properties(It PROPERTIES
         MACOSX_BUNDLE TRUE
@@ -165,6 +165,43 @@ elseif(WIN32)
     install(FILES compile_windows.bat DESTINATION .)
     install(FILES template.txt DESTINATION .)
     install(FILES builtin_mandi.txt DESTINATION .)
+else()
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${IT_ZIP} --format=zip it
+        DEPENDS ${IT_SOURCES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Creating zip.zip from it directory"
+        VERBATIM
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${MAPS_ZIP} --format=zip maps
+        DEPENDS ${MAP_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Creating maps.zip from maps directory"
+        VERBATIM
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/template.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_mandi.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/compile_linux.sh" "${CMAKE_CURRENT_BINARY_DIR}"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/compile_linux.sh"
+    )
+
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/It)
+    set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
+    install(TARGETS It RUNTIME DESTINATION .)
+    install(FILES $<TARGET_RUNTIME_DLLS:It> DESTINATION lib)
+    install(FILES ${CMAKE_SOURCE_DIR}/run.sh DESTINATION . PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
+
+    install(FILES ${IT_ZIP} DESTINATION .)
+    install(FILES ${MAPS_ZIP} DESTINATION .)
+    install(FILES compile_linux.sh DESTINATION .)
+    install(FILES template.txt DESTINATION .)
+    install(FILES builtin_mandi.txt DESTINATION .)
 endif()
 
 target_link_libraries(It PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::PrintSupport Qt6::Svg Qt6::Core Qt6::Network)
@@ -179,6 +216,14 @@ install(TARGETS It
 if (WIN32)
     install(TARGETS It RUNTIME DESTINATION .)
     install(FILES compile_macos.sh DESTINATION .)
+    install(FILES template.txt DESTINATION .)
+    install(FILES it.zip DESTINATION .)
+    install(FILES maps.zip DESTINATION .)
+elseif(APPLE)
+    #
+else()
+    install(TARGETS It RUNTIME DESTINATION .)
+    install(FILES compile_linux.sh DESTINATION .)
     install(FILES template.txt DESTINATION .)
     install(FILES it.zip DESTINATION .)
     install(FILES maps.zip DESTINATION .)
