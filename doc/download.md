@@ -12,7 +12,12 @@ done by opening a terminal and typing:
 ```sh
 xcode-select --install
 ```
-and following the on-screen instructions.
+and following the on-screen instructions. If you don't know whether you have a compiler installed, type
+```sh
+which c++
+```
+in a Terminal window. If the command outputs something like `/usr/bin/c++`, you have a compiler.
+If nothing appears, you do not.
 
 ### Installation Instructions:
 - Download [It.dmg](https://github.com/christian-mannes/it/releases/download/4.0b1/It.dmg)
@@ -20,7 +25,7 @@ and following the on-screen instructions.
 - Drag It.app into the application folder (or anywhere else if you prefer)
 - Double-click It.app to open it.
 
-The first time you open *It*, you will be prompted to select a directory for
+The first time you open *It*, you may be prompted to select a directory for
 for your files. Select any directory you see fit. 
 
 > Notice that if you had earlier versions
@@ -31,9 +36,23 @@ for your files. Select any directory you see fit.
 *It* supports Windows 11 - it may work on other versions but has not been tested.
 
 ### Prerequisites
-You must have a C++ compiler installed on your machine. We strongly recommend installing the [Visual Studio Community Edition](https://visualstudio.microsoft.com/vs/community/). You should at least download support for C++ development. *It* assumes that you are using the MSVCC 2022 compiler.
+You must have a C++ compiler installed on your machine. *It* assumes that you are using the MSVCC 2022 compiler - therefore we strongly recommend installing the [Visual Studio Community Edition](https://visualstudio.microsoft.com/vs/community/). When you run the Visual Studio Installer, select (at least) support for C++ development. The installer offers many options - make sure you select "Desktop Development with C++".
 
-TODO
+![Visual Studio Installation](../img/vs-install.png)
+
+### Installation Instructions
+
+- Download the installer
+- Open the installer
 
 ## Linux
-TODO
+Due to the number of possible Linux distros we cannot provide binaries for every possible version.
+We provide a binary release for Ubuntu. Should this not work for you, you should build from source (you will need Qt Creator 6.9.2 for this).
+
+If you want to try the binary:
+- Download ...
+- Unzip it
+- Open the "It" executable
+
+
+

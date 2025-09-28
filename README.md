@@ -2,7 +2,7 @@
 
 ## Introduction
 
-![Logo](img/mandi-128x128.png)
+![Logo](icons/icon_64x64.png)
 
 *It* is a desktop application for researchers in complex dynamical systems.
 
