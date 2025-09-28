@@ -15,6 +15,9 @@
 #include <QStyleHints>
 #include "mainwindow.h"
 
+#define xstr(a) str(a)
+#define str(a) #a
+
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
 #ifdef _WIN32
@@ -54,7 +57,7 @@ int main(int argc, char *argv[]) {
 #endif
   a.setApplicationName("It");
   a.setApplicationDisplayName("It");
-  a.setApplicationVersion("3.0");
+  a.setApplicationVersion(xstr(APP_VERSION));
   a.setOrganizationName("Mannes Technology");
 #ifdef Q_OS_WIN
   app.setWindowIcon(QIcon(":/icons/icon.ico"));

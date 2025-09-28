@@ -20,6 +20,9 @@
 #include "syntaxhighlightercpp.h"
 #include "jupyter.h"
 
+#define xstr(a) str(a)
+#define str(a) #a
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define CODE_TAB 0
@@ -49,6 +52,7 @@ MainWindow::MainWindow(bool darkMode, QWidget *parent) : QMainWindow(parent), ui
   mainWindow = this;
 
   ui->setupUi(this);
+  setWindowTitle(QString("It %1").arg(xstr(APP_VERSION)));
   // Help text browser
   QTextBrowser *browser = new QTextBrowser();
   ui->stackedWidget->widget(2)->layout()->addWidget(browser);
@@ -1171,9 +1175,6 @@ void MainWindow::on_actionCheat_Sheet_triggered() {
       "<li>Key R: randomlize colors for selection and orbit</li>"
     "</ul>");
 }
-
-#define xstr(a) str(a)
-#define str(a) #a
 
 void MainWindow::on_actionAbout_triggered() {
   QMessageBox::information(this, "About It",

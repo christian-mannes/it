@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(It VERSION 4.0.2 LANGUAGES CXX)
+project(It VERSION 4.0.3 LANGUAGES CXX)
 
 if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64") # Fat binaries

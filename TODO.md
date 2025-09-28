@@ -46,6 +46,7 @@
 - [X] Show code for samples (read only)
 - [X] Link for manual -> github version
 - [X] Open Jupyter in browser (not webview)
+-- 10/09/2025 Done ------------------------------------------------------------
 - [X] MacOS packaging/signing/DMG -- approx Sep 10
 -- 20/09/2025 Bugs ------------------------------------------------------------
 - [X] RGB: return rgb(int,int,int)
@@ -58,6 +59,9 @@
 - [X] Pick place in dspace, go back: coordinates bad
 - [X] Esc to reset zoom/exit whatever (like clicking)
 -------------------------------------------------------------------------------
+- [ ] Update manual
+- [ ] Get better colormaps (3D effect?)
+- [ ] A few built-in functions
 
 - [ ] Custom colormap in code
 - [ ] Bookmark places
@@ -69,14 +73,9 @@
     - [ ] Icon
     
 - [ ] Linux version
-
+    - [ ] Release
 
 -- Release --------------------------------------------------------------------
-- [ ] Change icon
-- [ ] Check all of Nuria's files (now in ~/It)
-- [ ] Update manual
-- [ ] Get better colormaps (3D effect?)
-- [ ] A few built-in functions
 
 - [ ] Qt showcase (app store?)
 
