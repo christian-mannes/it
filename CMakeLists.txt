@@ -33,10 +33,6 @@ message(STATUS "CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
 find_package(Qt6 REQUIRED COMPONENTS Widgets PrintSupport Svg Core Network)
 #find_package(Qt6 REQUIRED COMPONENTS WebEngineWidgets)
 
-option(BUILD_QT_INSTALLER "Build installer using Qt Installer Framework" OFF)
-# cmake -B build -DBUILD_QT_INSTALLER=ON
-# cmake --build build --target qt_installer
-
 qt_standard_project_setup()
 
 set(PROJECT_SOURCES
@@ -237,97 +233,4 @@ include(GNUInstallDirs)
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(It)
-endif()
-
-
-
-if(BUILD_QT_INSTALLER)
-    # Find Qt Installer Framework
-    find_program(QT_INSTALLER_BINARY
-        NAMES binarycreator binarycreator.exe
-        HINTS
-            ${Qt6_DIR}/../../../Tools/QtInstallerFramework/*/bin
-            "C:/Qt/Tools/QtInstallerFramework/*/bin"
-        DOC "Qt Installer Framework binarycreator"
-    )
-
-    if(NOT QT_INSTALLER_BINARY)
-        message(FATAL_ERROR "Qt Installer Framework not found! Install it via Qt Maintenance Tool.")
-    endif()
-
-    # Set installer directories
-    set(INSTALLER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/installer")
-    set(INSTALLER_BINARY_DIR "${CMAKE_BINARY_DIR}/installer")
-    set(INSTALLER_DATA_DIR "${INSTALLER_SOURCE_DIR}/packages/com.mannes-tech.it/data")
-
-    # Custom target to prepare installer data
-    add_custom_target(prepare_qt_installer
-        DEPENDS your_app_name
-
-        # Clear and create data directory
-        COMMAND ${CMAKE_COMMAND} -E rm -rf "${INSTALLER_DATA_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${INSTALLER_DATA_DIR}"
-
-        # Copy application executable
-        COMMAND ${CMAKE_COMMAND} -E copy
-            "$<TARGET_FILE:your_app_name>"
-            "${INSTALLER_DATA_DIR}/"
-
-        # Copy additional files (if any)
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_SOURCE_DIR}/resources"
-            "${INSTALLER_DATA_DIR}/resources"
-
-        # Copy license, readme, etc.
-        COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_SOURCE_DIR}/LICENSE.txt"
-            "${INSTALLER_DATA_DIR}/"
-
-        # Deploy Qt dependencies
-        COMMAND ${WINDEPLOYQT_EXECUTABLE}
-            "${INSTALLER_DATA_DIR}/$<TARGET_FILE_NAME:your_app_name>"
-            --dir "${INSTALLER_DATA_DIR}"
-            --no-translations  # Optional: exclude translations
-            --no-system-d3d-compiler  # Optional: reduce size
-            --no-opengl-sw  # Optional: reduce size
-
-        # Copy installer config to build directory
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${INSTALLER_SOURCE_DIR}/config"
-            "${INSTALLER_BINARY_DIR}/config"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${INSTALLER_SOURCE_DIR}/packages"
-            "${INSTALLER_BINARY_DIR}/packages"
-
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMENT "Preparing Qt Installer data..."
-    )
-
-    # Create the installer
-    add_custom_target(qt_installer
-        DEPENDS prepare_qt_installer
-
-        COMMAND "${QT_INSTALLER_BINARY}"
-            --offline-only
-            -c "${INSTALLER_BINARY_DIR}/config/config.xml"
-            -p "${INSTALLER_BINARY_DIR}/packages"
-            "${CMAKE_BINARY_DIR}/YourApp-Installer.exe"
-
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMENT "Creating Qt Installer executable..."
-    )
-
-    # Optional: Online installer
-    add_custom_target(qt_installer_online
-        DEPENDS prepare_qt_installer
-
-        COMMAND "${QT_INSTALLER_BINARY}"
-            --online-only
-            -c "${INSTALLER_BINARY_DIR}/config/config.xml"
-            -p "${INSTALLER_BINARY_DIR}/packages"
-            "${CMAKE_BINARY_DIR}/YourApp-OnlineInstaller.exe"
-
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMENT "Creating Qt Online Installer..."
-    )
 endif()

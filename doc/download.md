@@ -20,7 +20,7 @@ in a Terminal window. If the command outputs something like `/usr/bin/c++`, you 
 If nothing appears, you do not.
 
 ### Installation Instructions:
-- Download [It.dmg](https://github.com/christian-mannes/it/releases/download/4.0b1/It.dmg)
+- Download [It.dmg](https://github.com/christian-mannes/it/releases/download/latest/It.dmg)
 - Open the .dmg
 - Drag It.app into the application folder (or anywhere else if you prefer)
 - Double-click It.app to open it.
@@ -42,17 +42,18 @@ You must have a C++ compiler installed on your machine. *It* assumes that you ar
 
 ### Installation Instructions
 
-- Download the installer
-- Open the installer
+- Download the [installer](https://github.com/christian-mannes/it/releases/download/latest/itsetup.exe)
+- Run the installer
 
 ## Linux
-Due to the number of possible Linux distros we cannot provide binaries for every possible version.
+Due to the number of different Linux distros we cannot provide binaries for every possible version.
 We provide a binary release for Ubuntu. Should this not work for you, you should build from source (you will need Qt Creator 6.9.2 for this).
 
 If you want to try the binary:
-- Download ...
-- Unzip it
-- Open the "It" executable
+- Download [it.tar.gz](https://github.com/christian-mannes/it/releases/download/latest/it.tar.gz)
+- Go to a directory where you would like to place the "it" directory
+- Unzip it: `tar xvf it.tar.gz`
+- Run the "It" executable
 
 
 

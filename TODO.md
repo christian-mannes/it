@@ -59,54 +59,23 @@
 - [X] Pick place in dspace, go back: coordinates bad
 - [X] Esc to reset zoom/exit whatever (like clicking)
 -------------------------------------------------------------------------------
-- [ ] Update manual
-- [ ] Get better colormaps (3D effect?)
-- [ ] A few built-in functions
+- [X] Update manual
+- [X] Windows version
+- [X] Linux version
 
+- [ ] A few built-in functions
+- [ ] Get better colormaps
 - [ ] Custom colormap in code
 - [ ] Bookmark places
-- [ ] Update help files / web page
-
-- [ ] Windows version
-    - [ ] Debug/release in build script
-    - [ ] Test on x86
-    - [ ] Icon
-    
-- [ ] Linux version
-    - [ ] Release
-
--- Release --------------------------------------------------------------------
-
-- [ ] Qt showcase (app store?)
-
----Help------------------------------------------------------------------------
-- [X] About menu (prepared, see Claude)
-- [X] Explain how to get a compiler
-- [X] Help: Show long help as web page (integrated)
-- [ ] New screenshots (in dark mode, too)
-- [ ] Add how to debug
-- [ ] Add how to find and fix errors
-- [ ] Good and bad functions: thread-safety
 
 ---Ideas-----------------------------------------------------------------------
+- [ ] Qt showcase (app store?)
 - [ ] Compute servers (other copies)
 - [ ] Automatic copy function - new style functions 
 
-
-
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
-# Cheatsheet
-- Left drag: set selection
-- Left click inside selection: move selection
-- Left click outside selection: clear selection
-- Mouse wheel down: zoom in (click to reset)
-- Shift-left-drag: thumbnail (in parameter space only)
-- Alt-left-drag: draw 
-- 1-9: set orbit length
-- 0: reset orbit
-
 # Refine Algorithm
 Objectives:
     - Parallelize 

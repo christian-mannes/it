@@ -38,8 +38,8 @@ Creating a new function for *It*, in a technical sense, means creating a subclas
 
 Optionally, you can also:
 
--    Implement the **sandbox** function, which lets you manipulate the pixels of the image directly
--   Implement he **annotate** function, which lets you add graphical annotation on top of the image.
+- Implement the **sandbox** function, which lets you manipulate the pixels of the image directly
+- Implement he **annotate** function, which lets you add graphical annotation on top of the image.
 
 ### Variables Available to Functions
 
@@ -85,16 +85,16 @@ setDefaultRangeDynamicalSpace(xmin, xmax, ymin, ymax);
 ```
 
 ### copy
-Writing a copy function is optional, but necessary if you want to speed up calculation by using multiple cores. A copy function is written as follows (and included in the Template class):
+Writing a copy function is optional, but helpful if your code is not thread-safe. A copy function is written as follows:
 
 ```
 Function *copy() {
- Template *f = new Template(name, "", pspace);
+ MyClassName *f = new MyClassName(name, "", pspace);
  return f->copyArgsFrom(this);
 }
 ```
 
-### iterate
+### iterate (Legacy version)
 
 iterate is the most important function. When an image is computed, iterate is called for every pixel. Its two arguments (double x, double y) represent the coordinates of the pixel.
 
@@ -106,20 +106,69 @@ How your function computes this number is entirely up to you. The example from t
 
 ```c++
 byte iterate(double x, double y) {
- int i;
- if (PARAMETER_SPACE) {
-   z = complex(0, 0);
-   c.set(x, y);
- } else {
-   z = complex(x, y);
- }
- for (i = 0; i < depth; i++) {
-   z = z * z + c;
-   if (norm(z) > escape * escape) break;
- }
- return (byte)(255*i/depth);
+  complex z;
+  int i;
+  if (PARAMETER_SPACE) {
+    z = complex(0, 0);
+    c.set(x, y);
+  } else {
+    z = complex(x, y);
+  }
+  for (i = 0; i < depth; i++) {
+    z = z * z + c;
+    if (norm(z) > escape * escape) break;
+  }
+  return (byte)(255*i/depth);
 }
 ```
+
+### iterate_ (New version)
+Since version 4.0, continuous colormaps are supported. In the new version of iterate (called `iterate_` with an underscore), you should return a double in the interval [0, 1].
+
+```c++
+double iterate_(double x, double y) {
+  complex z;
+  int i;
+  if (PARAMETER_SPACE) {
+    z = complex(0, 0);
+    c.set(x, y);
+  } else {
+    z = complex(x, y);
+  }
+  for (i = 0; i < depth; i++) {
+    z = z * z + c;
+    if (norm(z) > escape * escape) break;
+  }
+  return (double)i / depth; // instead of 0..255, return 0.0..1.0
+}
+```
+
+### Thread-Safety
+The `iterate` (or `iterate_`) function is normally called from multiple threads, that is, in parallel. This means that your function must be **thread-safe**. In practice this means that all variables that are manipulated inside the iterate function must be **local** to that function.
+```c++
+  // BAD
+  
+  complex z; // BAD: z is declared at class level
+  
+  double iterate_(double x, double y) {
+    for (i = 0; i < depth; i++) {
+      z = z * z + c;
+    }
+  }
+```
+The correct version would declare the working variable `z` locally:
+```c++
+  // GOOD
+  
+  double iterate_(double x, double y) {
+    complex z; // good: z is declared locally
+    for (i = 0; i < depth; i++) {
+      z = z * z + c;
+    }
+    ...
+  }
+```
+If you see a garbled image, it is most likely to non-thread-safe code. Try disabling the "multithread" option to confirm, then make your code thread-safe. Using a `copy` method in your class can also help because implementing it means that each thread uses a separate copy of your class.
 
 ### orbit
 
@@ -220,6 +269,47 @@ void setColors() {
 
 Notice that using setColors does not modify the current colormap file permanently.
 
+If you are using the new-style `double iterate_(double x, double y)` function, you can also return a particular color for a point using the `rgb` function. `rgb` takes three arguments, each an int from 0..255.
+
+```c++
+double iterate_(double x, double y) {
+  ...
+  ...
+  if (condition) {
+    return rgb(255, 255, 0); // return yellow
+  }
+  ...
+  ...
+}
+```
+
+### Debugging Messages
+You can use the `debug` function to produce debugging messages. `debug` works like `printf`, for example:
+```c++
+double iterate_(double x, double y) {
+  complex z;
+  int i;
+  if (PARAMETER_SPACE) {
+    z = complex(0, 0);
+    c.set(x, y);
+  } else {
+    z = complex(x, y);
+  }
+  for (i = 0; i < depth; i++) {
+    z = z * z + c;
+    debug("%d: %f,%f", i, z.re, z.im); // <<<<<<------------- debug
+    if (norm(z) > escape * escape) break;
+  }
+  return (double)i / depth; // instead of 0..255, return 0.0..1.0
+}
+```
+Debug messages will only be shown if the "Debug" option is checked in the main window (bottom right). Even if that option is selected, only up to a maximum number of debug messages will be shown (by default 256). You can change this limit by using 
+```
+  setMaxDebug(newmax);
+```
+The appropriate place for `setMaxDebug` would be the constructor.
+
+
 ### Rays, Equipotentials and Sectors for Quadratic Maps
 
 There are functions which allow you to draw rays, equipotential curves and sectors for the quadratic family.
@@ -255,10 +345,17 @@ will draw a full equipotential of potential 0.25, for the current c-value.
 Example: draw_sect(c, 1,7,0.1,0.25,1000,75,40000)
 
  
+## Compilation Errors
+If you make a mistake in your code, It will not be able to compile your code. In this case, error messages will be shown below your code:
 
+![Error messages](../img/errors.png)
+
+If you click on the part of the error message that contains the line number, the cursor will be set to the corresponding place in your code.
  
 
-© 2012-2022 Mannes Technology
+---
+
+© 2012-2025 Mannes Technology
 
 Mannes Technology Consulting S.L., Pl. Tirant lo Blanc 7, 08005 Barcelona
 Reg. Merc. Barcelona Hoja B196344, Tomo 31785 Folio 102. CIF: B61977807
