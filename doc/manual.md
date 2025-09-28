@@ -2,7 +2,8 @@
 
 ## The User Interface
 
-![It User Interface](../img/gui.png)
+![It User Interface](../img/gui.png#gh-light-mode-only)
+![It User Interface](../img/gui-dark.png#gh-dark-mode-only)
 
 ## What's new in version 4.0
 *It* has been rewritten for version 4.0. The new version maintains backward compatibility with older versions.
