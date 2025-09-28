@@ -20,7 +20,7 @@
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
-#ifdef _WIN32
+#if 0 //#ifdef _WIN32
     if (AllocConsole()) {
       freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
       freopen_s((FILE**)stderr, "CONOUT$", "w", stderr);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
   a.setApplicationVersion(xstr(APP_VERSION));
   a.setOrganizationName("Mannes Technology");
 #ifdef Q_OS_WIN
-  app.setWindowIcon(QIcon(":/icons/icon.ico"));
+  a.setWindowIcon(QIcon(":/icons/icon.ico"));
 #endif
 #ifdef Q_OS_LINUX
   a.setWindowIcon(QIcon(":/icons/icon_48x48.png"));

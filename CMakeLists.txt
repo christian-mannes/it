@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(It VERSION 4.0.3 LANGUAGES CXX)
+if (WIN32)
+    set(CPACK_PACKAGE_NAME "It")
+    set(CPACK_PACKAGE_VERSION "4.0.3")
+    set(CPACK_GENERATOR "NSIS")
+endif()
 
 if(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64") # Fat binaries
@@ -27,6 +32,10 @@ message(STATUS "CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets PrintSupport Svg Core Network)
 #find_package(Qt6 REQUIRED COMPONENTS WebEngineWidgets)
+
+option(BUILD_QT_INSTALLER "Build installer using Qt Installer Framework" OFF)
+# cmake -B build -DBUILD_QT_INSTALLER=ON
+# cmake --build build --target qt_installer
 
 qt_standard_project_setup()
 
@@ -75,6 +84,7 @@ qt_add_executable(It
     compile_windows.bat
     app-icon.rc
     compile_linux.sh
+    deploy.bat
 )
 
 file(GLOB_RECURSE IT_SOURCES "${CMAKE_SOURCE_DIR}/it/*")
@@ -133,6 +143,11 @@ if(APPLE)
         PROPERTIES MACOSX_PACKAGE_LOCATION Resources
     )
     target_sources(It PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/icon.icns")
+    install(TARGETS It
+        BUNDLE DESTINATION .
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
 elseif(WIN32)
     set_target_properties(It PROPERTIES WIN32_EXECUTABLE TRUE)
     target_sources(It PRIVATE app-icon.rc)
@@ -160,11 +175,18 @@ elseif(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/compile_windows.bat" "${CMAKE_CURRENT_BINARY_DIR}"
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/compile_windows.bat"
     )
+    install(TARGETS It
+        RUNTIME DESTINATION .
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+    install(TARGETS It RUNTIME DESTINATION .)
     install(FILES ${IT_ZIP} DESTINATION .)
     install(FILES ${MAPS_ZIP} DESTINATION .)
     install(FILES compile_windows.bat DESTINATION .)
     install(FILES template.txt DESTINATION .)
     install(FILES builtin_mandi.txt DESTINATION .)
+    include(CPack)
 else()
     add_custom_command(TARGET It POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${IT_ZIP} --format=zip it
@@ -193,7 +215,11 @@ else()
 
     set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/It)
     set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
-    install(TARGETS It RUNTIME DESTINATION .)
+    install(TARGETS It
+        RUNTIME DESTINATION .
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
     install(FILES $<TARGET_RUNTIME_DLLS:It> DESTINATION lib)
     install(FILES ${CMAKE_SOURCE_DIR}/run.sh DESTINATION . PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 
@@ -208,27 +234,100 @@ target_link_libraries(It PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::PrintSuppor
 #target_link_libraries(It PRIVATE Qt6::WebEngineWidgets)
 
 include(GNUInstallDirs)
-install(TARGETS It
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-if (WIN32)
-    install(TARGETS It RUNTIME DESTINATION .)
-    install(FILES compile_macos.sh DESTINATION .)
-    install(FILES template.txt DESTINATION .)
-    install(FILES it.zip DESTINATION .)
-    install(FILES maps.zip DESTINATION .)
-elseif(APPLE)
-    #
-else()
-    install(TARGETS It RUNTIME DESTINATION .)
-    install(FILES compile_linux.sh DESTINATION .)
-    install(FILES template.txt DESTINATION .)
-    install(FILES it.zip DESTINATION .)
-    install(FILES maps.zip DESTINATION .)
-endif()
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(It)
+endif()
+
+
+
+if(BUILD_QT_INSTALLER)
+    # Find Qt Installer Framework
+    find_program(QT_INSTALLER_BINARY
+        NAMES binarycreator binarycreator.exe
+        HINTS
+            ${Qt6_DIR}/../../../Tools/QtInstallerFramework/*/bin
+            "C:/Qt/Tools/QtInstallerFramework/*/bin"
+        DOC "Qt Installer Framework binarycreator"
+    )
+
+    if(NOT QT_INSTALLER_BINARY)
+        message(FATAL_ERROR "Qt Installer Framework not found! Install it via Qt Maintenance Tool.")
+    endif()
+
+    # Set installer directories
+    set(INSTALLER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/installer")
+    set(INSTALLER_BINARY_DIR "${CMAKE_BINARY_DIR}/installer")
+    set(INSTALLER_DATA_DIR "${INSTALLER_SOURCE_DIR}/packages/com.mannes-tech.it/data")
+
+    # Custom target to prepare installer data
+    add_custom_target(prepare_qt_installer
+        DEPENDS your_app_name
+
+        # Clear and create data directory
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${INSTALLER_DATA_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${INSTALLER_DATA_DIR}"
+
+        # Copy application executable
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "$<TARGET_FILE:your_app_name>"
+            "${INSTALLER_DATA_DIR}/"
+
+        # Copy additional files (if any)
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/resources"
+            "${INSTALLER_DATA_DIR}/resources"
+
+        # Copy license, readme, etc.
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_SOURCE_DIR}/LICENSE.txt"
+            "${INSTALLER_DATA_DIR}/"
+
+        # Deploy Qt dependencies
+        COMMAND ${WINDEPLOYQT_EXECUTABLE}
+            "${INSTALLER_DATA_DIR}/$<TARGET_FILE_NAME:your_app_name>"
+            --dir "${INSTALLER_DATA_DIR}"
+            --no-translations  # Optional: exclude translations
+            --no-system-d3d-compiler  # Optional: reduce size
+            --no-opengl-sw  # Optional: reduce size
+
+        # Copy installer config to build directory
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${INSTALLER_SOURCE_DIR}/config"
+            "${INSTALLER_BINARY_DIR}/config"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${INSTALLER_SOURCE_DIR}/packages"
+            "${INSTALLER_BINARY_DIR}/packages"
+
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Preparing Qt Installer data..."
+    )
+
+    # Create the installer
+    add_custom_target(qt_installer
+        DEPENDS prepare_qt_installer
+
+        COMMAND "${QT_INSTALLER_BINARY}"
+            --offline-only
+            -c "${INSTALLER_BINARY_DIR}/config/config.xml"
+            -p "${INSTALLER_BINARY_DIR}/packages"
+            "${CMAKE_BINARY_DIR}/YourApp-Installer.exe"
+
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Creating Qt Installer executable..."
+    )
+
+    # Optional: Online installer
+    add_custom_target(qt_installer_online
+        DEPENDS prepare_qt_installer
+
+        COMMAND "${QT_INSTALLER_BINARY}"
+            --online-only
+            -c "${INSTALLER_BINARY_DIR}/config/config.xml"
+            -p "${INSTALLER_BINARY_DIR}/packages"
+            "${CMAKE_BINARY_DIR}/YourApp-OnlineInstaller.exe"
+
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Creating Qt Online Installer..."
+    )
 endif()

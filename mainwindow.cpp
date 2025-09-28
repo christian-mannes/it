@@ -1096,7 +1096,12 @@ bool MainWindow::compileAndLoad(const QString &fname, bool builtin_, bool thenSt
   #ifdef Q_OS_WIN
       args << "/c";
   #endif
-      args << comp << fname << filesDirectory << exe << "NOCLEAR" << QString::number(version);
+      args << comp << fname << filesDirectory << exe << "CLEAN" << QString::number(version);
+#ifdef DEBUG
+      args << "DEBUG";
+#else
+      args << "RELEASE";
+#endif
       qDebug() << "Will compile:" << cmd << args;
       proc.start(cmd, args);
       proc.waitForFinished();
@@ -1186,7 +1191,7 @@ void MainWindow::on_actionAbout_triggered() {
       "<h3>Development:</h3>"
       "<p>&nbsp;&nbsp;&nbsp;Christian Mannes</p>"
       "<h3>Web Page:</h3>"
-      "<p>&nbsp;&nbsp;&nbsp;https://www.mannes-tech.com/It/</p>"
+      "<p>&nbsp;&nbsp;&nbsp;https://https://github.com/christian-mannes/it</p>"
       "<p><i>Copyright (c) 1998-2025 Mannes Technology. All rights reserved</i></p>").arg(xstr(APP_VERSION)));
 }
 
