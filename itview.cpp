@@ -11,6 +11,7 @@
 #include <QPrintPreviewDialog>
 #include <QtSvg/QSvgGenerator>
 #include <QPrinter>
+#include <QColorSpace>
 #include <QRandomGenerator>
 
 #include "itview.h"
@@ -105,6 +106,8 @@ void ItView::randomizeColors() {
 
 void ItView::drawContent(QPainter &painter, const QRect &targetRect) {
   painter.setRenderHint(QPainter::Antialiasing);
+  painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+  painter.setCompositionMode(QPainter::CompositionMode_Source);
   painter.translate(pan);
   painter.scale(zoom, zoom);
 
@@ -208,6 +211,7 @@ void ItView::mouseMoveEvent(QMouseEvent *event) {
         thumbnail = new QImage(thumbsize, thumbsize, QImage::Format_RGB32);
         thumbstate = new State(function->other, colormap, thumbsize, thumbsize);
         thumbstate->getRangeFromFunction();
+        function->other->state = thumbstate;
       }
       function->other->setParameter(state->X(mousex), state->Y(mousey));
       for (int y = 0; y < thumbsize; y++) {
@@ -350,6 +354,7 @@ void ItView::startRender(Function *function_, State *state_, Colormap *colormap_
   }
   if (image == nullptr) {
     image = new QImage(w, h, QImage::Format_RGB32);
+    image->setColorSpace(QColorSpace::SRgb);
   }
   resize(QSize(w, h));
   adjustSize();
@@ -517,7 +522,7 @@ void ItView::map() {
   int h = state->getHeight();
   int w = state->getWidth();
   const uchar *bits = image->bits();
-  ibits = (int *)bits;
+  ibits = (uint *)bits;
   int idx = 0;
   for (int y = 0; y < h; y++) {
     for (int x = 0; x < w; x++) {

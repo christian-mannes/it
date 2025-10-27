@@ -63,9 +63,15 @@
 - [X] Windows version
 - [X] Linux version
 
-- [ ] A few built-in functions
+- [X] Colormap bug (casting etc)
+- [ ] Default size 1000, max higher, weirdness editing size by hand
+- [ ] Save PDF: tiny picture
+- [ ] Colormap changing weirdness
+- [ ] Change colormap while computing: disable
+- [ ] Add built-in functions
+
+- [X] Custom colormap in code: rgb
 - [ ] Get better colormaps
-- [ ] Custom colormap in code
 - [ ] Bookmark places
 
 ---Ideas-----------------------------------------------------------------------

@@ -116,9 +116,12 @@ void Function::start(bool debug_enabled) {
   state->start();
 }
 
+//inline constexpr QRgb qRgb(int r, int g, int b)         // set RGB value
+//{ return (0xffu << 24) | ((r & 0xffu) << 16) | ((g & 0xffu) << 8) | (b & 0xffu); }
+
 double Function::rgb(int r, int g, int b) {
   union { double d; uint64_t i; } u;
-  u.i = (0x8000000000000000ULL | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF));
+  u.i = (0x8000000000000000ull | (0xff000000ull) | ((r & 0xffull) << 16) | ((g & 0xffull) << 8) | (b & 0xffull));
   return u.d;
 }
 

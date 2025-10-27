@@ -76,11 +76,13 @@ qt_add_executable(It
     LICENSE.md
     deploy.sh
     doc/download.md doc/manual.md
-    builtin_mandi.txt
     compile_windows.bat
     app-icon.rc
     compile_linux.sh
     deploy.bat
+    builtin_sample_milnor.txt
+    builtin_sample_newton.txt
+    builtin_sample_quadratic.txt
 )
 
 file(GLOB_RECURSE IT_SOURCES "${CMAKE_SOURCE_DIR}/it/*")
@@ -94,7 +96,7 @@ if(APPLE)
         COMMAND ${CMAKE_COMMAND} -E tar "cvf" ${IT_ZIP} --format=zip it
         DEPENDS ${IT_SOURCES}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Creating zip.zip from it directory"
+        COMMENT "Creating it.zip from it directory"
         VERBATIM
     )
     add_custom_command(
@@ -110,8 +112,12 @@ if(APPLE)
     set_source_files_properties(compile_macos.sh PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE template.txt)
     set_source_files_properties(template.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    target_sources(It PRIVATE builtin_mandi.txt)
-    set_source_files_properties(builtin_mandi.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(It PRIVATE builtin_sample_quadratic.txt)
+    set_source_files_properties(builtin_sample_quadratic.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(It PRIVATE builtin_sample_milnor.txt)
+    set_source_files_properties(builtin_sample_milnor.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(It PRIVATE builtin_sample_newton.txt)
+    set_source_files_properties(builtin_sample_newton.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE ${IT_ZIP})
     set_source_files_properties(${IT_ZIP} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE ${MAPS_ZIP})
@@ -165,7 +171,13 @@ elseif(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/template.txt" "${CMAKE_CURRENT_BINARY_DIR}"
     )
     add_custom_command(TARGET It POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_mandi.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_quadratic.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_milnor.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_newton.txt" "${CMAKE_CURRENT_BINARY_DIR}"
     )
     add_custom_command(TARGET It POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/compile_windows.bat" "${CMAKE_CURRENT_BINARY_DIR}"
@@ -181,7 +193,9 @@ elseif(WIN32)
     install(FILES ${MAPS_ZIP} DESTINATION .)
     install(FILES compile_windows.bat DESTINATION .)
     install(FILES template.txt DESTINATION .)
-    install(FILES builtin_mandi.txt DESTINATION .)
+    install(FILES builtin_sample_quadratic.txt DESTINATION .)
+    install(FILES builtin_sample_newton.txt DESTINATION .)
+    install(FILES builtin_sample_milnor.txt DESTINATION .)
     include(CPack)
 else()
     add_custom_command(TARGET It POST_BUILD
@@ -202,7 +216,13 @@ else()
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/template.txt" "${CMAKE_CURRENT_BINARY_DIR}"
     )
     add_custom_command(TARGET It POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_mandi.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_quadratic.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_milnor.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+    add_custom_command(TARGET It POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_newton.txt" "${CMAKE_CURRENT_BINARY_DIR}"
     )
     add_custom_command(TARGET It POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/compile_linux.sh" "${CMAKE_CURRENT_BINARY_DIR}"
@@ -223,7 +243,9 @@ else()
     install(FILES ${MAPS_ZIP} DESTINATION .)
     install(FILES compile_linux.sh DESTINATION .)
     install(FILES template.txt DESTINATION .)
-    install(FILES builtin_mandi.txt DESTINATION .)
+    install(FILES builtin_sample_quadratic.txt DESTINATION .)
+    install(FILES builtin_sample_milnor.txt DESTINATION .)
+    install(FILES builtin_sample_newton.txt DESTINATION .)
 endif()
 
 target_link_libraries(It PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::PrintSupport Qt6::Svg Qt6::Core Qt6::Network)

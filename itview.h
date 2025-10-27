@@ -69,7 +69,7 @@ private:
   std::atomic<int> pendingPixels;
   int totalPixels;
   QImage *image;
-  int *ibits;
+  uint *ibits;
   QImage *thumbnail;
   QThreadPool *threadPool;
   QElapsedTimer elapsedTimer;

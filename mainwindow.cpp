@@ -32,7 +32,7 @@
 
 MainWindow *mainWindow = nullptr;
 #define DEFAULT_COLORMAP "hot"
-#define DEFAULT_FUNCTION_NAME "Mandi"
+#define DEFAULT_FUNCTION_NAME "Sample Quadratic"
 
 QString name2file(const QString &name) {
   QString result;
@@ -163,10 +163,8 @@ MainWindow::~MainWindow() {
 
 void MainWindow::postInit() {
   loadSettings();
-  if (filesDirectory.isEmpty()) {
-    // first-time use, set up files directory and install color maps
-    firstTimeUse(true);
-  }
+  // set up files directory and install color maps if necessary
+  firstTimeUse(true);
 
   // Classic-style color maps (from files)
   QString path = filesDirectory + "maps";
@@ -274,16 +272,17 @@ void MainWindow::firstTimeUse(bool acceptLegacy) {
 }
 void MainWindow::firstTimeUseWin(bool acceptLegacy) {
 #ifdef Q_OS_WIN
-  filesDirectory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-  QDir dir;
-  if (!dir.mkpath(filesDirectory)) {
-    qDebug() << "Could not create files directory";
-  } else {
-    qDebug() << "app data dir created";
+  if (filesDirectory.isEmpty()) {
+    filesDirectory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir dir;
+    if (!dir.mkpath(filesDirectory)) {
+      qDebug() << "Could not create files directory";
+    } else {
+      qDebug() << "app data dir created";
+    }
+    if (!filesDirectory.endsWith("/")) filesDirectory += "/";
+    qDebug() << "filesDirectory:" << filesDirectory;
   }
-  if (!filesDirectory.endsWith("/")) filesDirectory += "/";
-  qDebug() << "filesDirectory:" << filesDirectory;
-
   // Install color maps
   QFileInfo exe(QApplication::applicationDirPath() + "/It.exe");
   QFileInfo mapsdir(filesDirectory + "maps");
@@ -333,36 +332,38 @@ void MainWindow::firstTimeUseWin(bool acceptLegacy) {
 
 void MainWindow::firstTimeUseMac(bool acceptLegacy) {
 #ifdef Q_OS_APPLE
-  // Do we have the legacy directory ~/Library/Application Support/It ?
-  QString legacyPath = QDir::homePath() + "/Library/Application Support/It";
-  QDir legacyDir(legacyPath);
-  bool doPrompt = true;
-  if (legacyDir.exists() && acceptLegacy) { // use it on first time use (acceptLegacy)
-    filesDirectory = legacyPath + "/";
-    statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
-    doPrompt = false;
-  }
-  // If not, prompt user for a directory - repeat until we have one
-  if (doPrompt) {
-    QMessageBox msgBox;
-    msgBox.setText("Please select a directory for your function files");
-    msgBox.exec();
-    while (true) {
-      filesDirectory = QFileDialog::getExistingDirectory(this,
-          "Please select a directory for your function files",
-          QDir::homePath());
-      if (filesDirectory.isEmpty()) {
-        QMessageBox msgBox;
-        msgBox.setText("You must select a directory for your function files");
-        msgBox.exec();
-      } else {
-        filesDirectory += "/";
-        saveSettings();
-        break;
+  if (filesDirectory.isEmpty()) {
+    // Do we have the legacy directory ~/Library/Application Support/It ?
+    QString legacyPath = QDir::homePath() + "/Library/Application Support/It";
+    QDir legacyDir(legacyPath);
+    bool doPrompt = true;
+    if (legacyDir.exists() && acceptLegacy) { // use it on first time use (acceptLegacy)
+      filesDirectory = legacyPath + "/";
+      statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
+      doPrompt = false;
+    }
+    // If not, prompt user for a directory - repeat until we have one
+    if (doPrompt) {
+      QMessageBox msgBox;
+      msgBox.setText("Please select a directory for your function files");
+      msgBox.exec();
+      while (true) {
+        filesDirectory = QFileDialog::getExistingDirectory(this,
+            "Please select a directory for your function files",
+            QDir::homePath());
+        if (filesDirectory.isEmpty()) {
+          QMessageBox msgBox;
+          msgBox.setText("You must select a directory for your function files");
+          msgBox.exec();
+        } else {
+          filesDirectory += "/";
+          saveSettings();
+          break;
+        }
       }
     }
+    statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
   }
-  statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
 
   // Install color maps
   QFileInfo exe(QApplication::applicationDirPath() + "/It");
@@ -380,6 +381,8 @@ void MainWindow::firstTimeUseMac(bool acceptLegacy) {
 
   // Install include files for compilation
   QFileInfo itdir(filesDirectory + "it");
+  qDebug() << itdir.lastModified();
+  qDebug() << exe.lastModified();
   if (!itdir.exists() || itdir.lastModified() < exe.lastModified()) {
     qDebug() << "Installing include files";
     QString itzip = QApplication::applicationDirPath() + "/../Resources/it.zip";
@@ -409,37 +412,38 @@ void MainWindow::firstTimeUseMac(bool acceptLegacy) {
 
 void MainWindow::firstTimeUseLinux(bool acceptLegacy) {
 #ifdef Q_OS_LINUX
-  // Do we have the legacy directory ~/Library/Application Support/It ?
-  QString legacyPath = QDir::homePath() + "/It";
-  QDir legacyDir(legacyPath);
-  bool doPrompt = true;
-  if (legacyDir.exists() && acceptLegacy) { // use it on first time use (acceptLegacy)
-    filesDirectory = legacyPath + "/";
-    statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
-    doPrompt = false;
-  }
-  // If not, prompt user for a directory - repeat until we have one
-  if (doPrompt) {
-    QMessageBox msgBox;
-    msgBox.setText("Please select a directory for your function files");
-    msgBox.exec();
-    while (true) {
-      filesDirectory = QFileDialog::getExistingDirectory(this,
-          "Please select a directory for your function files",
-          QDir::homePath());
-      if (filesDirectory.isEmpty()) {
-        QMessageBox msgBox;
-        msgBox.setText("You must select a directory for your function files");
-        msgBox.exec();
-      } else {
-        filesDirectory += "/";
-        saveSettings();
-        break;
+  if (filesDirectory.isEmpty()) {
+    // Do we have the legacy directory ~/Library/Application Support/It ?
+    QString legacyPath = QDir::homePath() + "/It";
+    QDir legacyDir(legacyPath);
+    bool doPrompt = true;
+    if (legacyDir.exists() && acceptLegacy) { // use it on first time use (acceptLegacy)
+      filesDirectory = legacyPath + "/";
+      statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
+      doPrompt = false;
+    }
+    // If not, prompt user for a directory - repeat until we have one
+    if (doPrompt) {
+      QMessageBox msgBox;
+      msgBox.setText("Please select a directory for your function files");
+      msgBox.exec();
+      while (true) {
+        filesDirectory = QFileDialog::getExistingDirectory(this,
+            "Please select a directory for your function files",
+            QDir::homePath());
+        if (filesDirectory.isEmpty()) {
+          QMessageBox msgBox;
+          msgBox.setText("You must select a directory for your function files");
+          msgBox.exec();
+        } else {
+          filesDirectory += "/";
+          saveSettings();
+          break;
+        }
       }
     }
+    statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
   }
-  statusBar()->showMessage(QString("Your files directory is %1").arg(filesDirectory));
-
   // Install color maps
   QFileInfo exe(QApplication::applicationDirPath() + "/It");
   QFileInfo mapsdir(filesDirectory + "maps");

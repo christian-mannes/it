@@ -39,11 +39,11 @@ public:
   void restore();
   void load(const std::string &filename);
   void save(const char *file);
-  int getColor(double x); // x in [0, 1]
+  uint getColor(double x); // x in [0, 1]
 
 private:
   int (*colorfun)(double t);
-  std::vector<int> table;
+  std::vector<uint> table;
 };
 
 #endif /* Colormap_H */
