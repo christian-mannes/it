@@ -162,19 +162,178 @@ CLASS(SampleNewton, "Newton's Method") { public:
     a.set(x, y);
   }
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+CLASS(SampleCentExponential, "CentExponential: a (exp(z)-1)") { public:
+  complex a;
+  int depth, plotpoints;
+  double escape;
+
+  SampleCentExponential(String name, String label, int pspace) : Function(name, label, pspace) {
+    PARAM(a, "a", complex, complex(0, 0), complex(0.2, 0));
+    PARAM(depth, "depth", int, 50, 50);
+    PARAM(plotpoints, "plotpoints", int, 50000, 50000);
+    PARAM(escape, "bound", double, 500, 500);
+    setDefaultRangeParameterSpace(-5, 5, -6, 6);
+    setDefaultRangeDynamicalSpace(-2, 12, -7, 7);
+  }
+
+  Function *copy() {
+    SampleCentExponential *f = new SampleCentExponential(name, "", pspace);
+    return f->copyArgsFrom(this);
+  }
+
+  double iterate_(double x, double y) {
+    int i;
+    complex z, w;
+    if (PARAMETER_SPACE) {
+      a.set(x, y);
+      z = -a;
+    } else {
+      z = complex(x, y);
+    }
+    for (i = 0; i < depth; i++) {
+      z = a * (exp(z) - 1);
+      if ((z.real() > escape))  return (double)i/depth;
+    }
+    return 1.0;
+  }
+
+  void orbit(complex &z) {
+    z = a * (exp(z) - 1);
+  }
+
+  void setParameter(double x, double y) {
+    a.set(x, y);
+  }
+
+  void sandbox() {
+    int i;
+    int pixcount = 0;
+    complex z;
+    z = -a;
+    for (i = 0; i < plotpoints; i++) {
+      orbit(z);
+      SETPIXEL(z.re, z.im, 155);
+      pixcount++;
+    }
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+#ifndef TWO_PI
+#define TWO_PI 6.2831853071796
+#endif
+
+CLASS(SampleTangent, "tangent: a tan(z)") { public:
+  complex a;
+  int depth;
+  double escape, pixfactor;
+
+  SampleTangent(String name, String label, int pspace) : Function(name, label, pspace) {
+    ARG(a, "a", complex, complex(0, TWO_PI), ANY);
+    ARG(depth, "depth", int, 200, ANY);
+    ARG(escape, "bound", double, 1000, ANY);
+    PARAM(pixfactor, "pixfactor", double, 1,1);
+    defaults();
+  }
+  void defaults() {
+    if (PARAMETER_SPACE) {
+      setDefaultRange(-6, 6, -6, 6);
+    } else {
+      a.set(0, TWO_PI);
+      setDefaultRange(-9, 5, -7, 7);
+    }
+  }
+
+  Function *copy() {
+    SampleTangent *f = new SampleTangent(name, "", pspace);
+    return f->copyArgsFrom(this);
+  }
+
+  // Use byte iterate version because we use SETCOLOR
+  byte iterate(double x, double y) {
+    int i;
+    complex z, w, ii;
+    ii = complex(0,1);
+    complex der, epsilon, u;
+    if (PARAMETER_SPACE) {
+      a.set(x,y);
+      z = a * complex(0,1);
+    } else {
+      z = complex(x, y);
+    }
+    if (PARAMETER_SPACE) {
+      for(i = 0; i < depth; i++) {
+        z = -ii* a * (exp(ii*z)-exp(-ii*z))/(exp(ii*z)+exp(-ii*z));
+        if(norm(z) > escape*escape) break;
+      }
+      if (i < depth - 1) return (byte)(255*i/depth);
+      w = z;
+      for (i = 1; i < 11; i++) {
+        z = -ii* a * (exp(ii*z)-exp(-ii*z))/(exp(ii*z)+exp(-ii*z));
+        if (norm(z-w) < 1/escape) break;
+      }
+      if (i==11) return 255;
+      return (byte) (i);
+    } else {
+      w = z;
+      der = complex(1,0);
+      for(i = 0; i < depth; i++) {
+       der = (a*der)/(cos(z)*cos(z));
+        z = -ii* a * (exp(ii*z)-exp(-ii*z))/(exp(ii*z)+exp(-ii*z));
+      if (norm(der) > 1.001) {
+        epsilon = (z-w)/(der-1);
+        if (fabs(epsilon.re) < (0.006/pixfactor)&& fabs(epsilon.im) < (0.006/pixfactor)) return (byte) 255;
+      }
+      };
+      return (byte) 2;
+    }
+  }
+  void orbit(complex &z) {
+    complex ii;
+    ii = complex(0,1);
+    z = -ii* a * (exp(ii*z)-exp(-ii*z))/(exp(ii*z)+exp(-ii*z));
+  }
+  void setParameter(double x, double y) {
+    a.set(x, y);
+  }
+  void setColors() {
+    SETCOLOR(1, 255, 255, 0);
+    SETCOLOR(2, 0, 255, 255);
+    SETCOLOR(3, 255, 0, 0);
+    SETCOLOR(4, 128, 128, 0);
+    SETCOLOR(5, 0, 255, 0);
+    SETCOLOR(6, 0, 0, 255);
+    SETCOLOR(7, 0, 0, 128);
+    SETCOLOR(8, 255, 0, 255);
+    SETCOLOR(9, 255, 102, 0);
+    SETCOLOR(10, 204, 0, 255);
+    //  SETCOLOR (200, 204, 255, 255); /*light blue*/
+    SETCOLOR (0, 255, 255, 255); /*white*/
+  }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 Function *createBuiltinFunction(const std::string &name) {
   Function *p = nullptr, *d = nullptr;
-  if (name == "SampleQuadratic") {
+  if (name == "Sample Quadratic") {
     p = new SampleQuadratic("a", "b", 1);
     d = new SampleQuadratic("a", "a", 0);
-  } else if (name == "SampleMilnor") {
+  } else if (name == "Sample Milnor") {
     p = new SampleMilnor("a", "b", 1);
     d = new SampleMilnor("a", "a", 0);
-  } else if (name == "SampleNewton") {
+  } else if (name == "Sample Newton") {
     p = new SampleNewton("a", "b", 1);
     d = new SampleNewton("a", "a", 0);
+  } else if (name == "Sample CentExponential") {
+    p = new SampleCentExponential("a", "b", 1);
+    d = new SampleCentExponential("a", "a", 0);
+  } else if (name == "Sample Tangent") {
+    p = new SampleTangent("a", "b", 1);
+    d = new SampleTangent("a", "a", 0);
   }
   if (p && d) { p->other = d; d->other = p; }
   return p;

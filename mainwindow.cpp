@@ -629,8 +629,10 @@ void MainWindow::treeItemRenamed(TreeItem* item, const QString& oldName, const Q
   }
 }
 void MainWindow::treeItemMoved(TreeItem* item, TreeItem* oldParent, TreeItem* newParent) {
-  saveFunctionList();
-  qDebug() << "moved" << item->displayName();
+  if (item != nullptr && oldParent != nullptr && newParent != nullptr) {
+    saveFunctionList();
+    qDebug() << "moved" << item->displayName();
+  }
 }
 void MainWindow::treeItemAdded(TreeItem* item, TreeItem* parent) {
   qDebug() << "added" << item->displayName();
@@ -836,10 +838,37 @@ void MainWindow::on_thumb_slider_valueChanged(int value) {
   ui->itView->thumbsize = v;
 }
 
+void MainWindow::on_thumbnailCheckBox_checkStateChanged(const Qt::CheckState &arg1) {
+  ui->itView->setThumbing(arg1 == Qt::Checked);
+}
+
+void MainWindow::on_thumnailAcceptButton_clicked() {
+  ui->itView->acceptThumb();
+}
+
 void MainWindow::on_resolution_xres_textChanged(const QString &arg1) {
+#if 0
   int xres;
   try {
     xres = arg1.toInt();
+    double xmin = ui->xmin_le->text().toDouble();
+    double xmax = ui->xmax_le->text().toDouble();
+    double ymin = ui->ymin_le->text().toDouble();
+    double ymax = ui->ymax_le->text().toDouble();
+    int yres = (int)(xres * (ymax - ymin) / (xmax - xmin));
+    ui->slider_res->setValue(xres);
+    ui->resolution_yres->setText(QString::number(yres));
+  } catch (...) {
+
+  }
+#endif
+}
+
+void MainWindow::on_resolution_xres_editingFinished()
+{
+  int xres;
+  try {
+    xres = ui->resolution_xres->text().toInt();
     double xmin = ui->xmin_le->text().toDouble();
     double xmax = ui->xmax_le->text().toDouble();
     double ymin = ui->ymin_le->text().toDouble();
@@ -887,13 +916,6 @@ TreeModel *MainWindow::initFunctionList() {
   TreeModel *model = new TreeModel(this);
   TreeItem *root = model->rootItem(), *folder = nullptr;
 
-  // Built-in functions (TODO: add some more) - not read from file
-  //treemodel->addFolder("Built-In");
-  builtin.insert(DEFAULT_FUNCTION_NAME); // add to builtin set
-  TreeItem *item = new TreeItem(DEFAULT_FUNCTION_NAME, TreeItem::Item);
-  item->readOnly = true;
-  root->appendChild(item);
-
   // Read f_list.txt file
   QString path = filesDirectory;
   QString listpath = path + "f_list.txt";
@@ -927,6 +949,17 @@ TreeModel *MainWindow::initFunctionList() {
       }
     }
     inputFile.close();
+  }
+  // Built-in functions - not read from file
+  //treemodel->addFolder("Sample Functions");
+  folder = new TreeItem("Samples", TreeItem::Folder);
+  root->appendChild(folder);
+  QStringList builtins = { "Sample Quadratic", "Sample Newton", "Sample Milnor", "Sample Tangent", "Sample CentExponential"};
+  for (const QString &f: builtins) {
+    builtin.insert(f); // add to builtin set
+    TreeItem *item = new TreeItem(f, TreeItem::Item);
+    item->readOnly = true;
+    folder->appendChild(item);
   }
   return model;
 }
@@ -1004,24 +1037,51 @@ void MainWindow::setFunction(const QString &newFunction, bool thenStart) {
   QString file, fname = name2file(newFunction);
   bool builtin_ = false;
   if (builtin.contains(newFunction)) {
-    file = resourceDirectory + "builtin_" + fname + ".txt";
+    //file = resourceDirectory + "builtin_" + fname + ".txt";
+    file = resourceDirectory + "builtin.txt";
     builtin_ = true;
   } else {
     file = filesDirectory + fname + ".cpp";
   }
-  QFileInfo fileinfo(file);
-  if (fileinfo.exists()) {
-    QFile codefile(file);
-    if (codefile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      QTextStream stream(&codefile);
-      QString contents = stream.readAll();
-      ui->codeEditor->setPlainText(contents);
-      if (!thenStart) ui->stackedWidget->setCurrentIndex(CODE_TAB);
+
+  if (builtin_) {
+    QFile inputFile(file);
+    QString contents;
+    if (inputFile.open(QIODevice::ReadOnly)) {
+      QTextStream in(&inputFile);
+      bool include = false;
+      QString starttoken = QString("### %1").arg(newFunction);
+      while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (include) {
+          contents += line;
+          contents += "\n";
+        }
+        if (line.startsWith(starttoken)) {
+          include = true;
+        } else if (line.startsWith("###")) {
+          include = false;
+        }
+      }
+      inputFile.close();
     }
+    ui->codeEditor->setPlainText(contents);
+    if (!thenStart) ui->stackedWidget->setCurrentIndex(CODE_TAB);
   } else {
-    ui->codeEditor->setPlainText("");
-    qDebug() << file << "not found";
-    return;
+    QFileInfo fileinfo(file);
+    if (fileinfo.exists()) {
+      QFile codefile(file);
+      if (codefile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream stream(&codefile);
+        QString contents = stream.readAll();
+        ui->codeEditor->setPlainText(contents);
+        if (!thenStart) ui->stackedWidget->setCurrentIndex(CODE_TAB);
+      }
+    } else {
+      ui->codeEditor->setPlainText("");
+      qDebug() << file << "not found";
+      return;
+    }
   }
 
   // Compile and load from callback (async)
@@ -1200,4 +1260,3 @@ void MainWindow::on_actionAbout_triggered() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-

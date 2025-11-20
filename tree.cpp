@@ -53,9 +53,10 @@ void TreeItem::removeChild(int index) {
 }
 
 void TreeItem::moveTo(TreeItem* newParent, int newIndex) {
-  if (!newParent || newParent == m_parent) return;
+  if (!newParent) return;// || newParent == m_parent) { qDebug()<<"A"; return;}
   // Only folders can contain children
-  if (!newParent->isFolder() && newParent->m_parent != nullptr) return;
+  if (!newParent->isFolder() && newParent->m_parent != nullptr) { qDebug()<<"B"; return;}
+
   TreeItem* oldParent = m_parent;
   if (oldParent) {
     oldParent->removeChild(this);

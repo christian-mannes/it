@@ -51,6 +51,8 @@ public:
   void setColormap(Colormap *colormap);
   Tile *getTile();
   void renderTile(Tile *tile);
+  void setThumbing(bool flag);
+  void acceptThumb();
   void deleteThumbnail();
   void addOrbit();
   QRect selection;

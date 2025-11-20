@@ -594,7 +594,7 @@
             <number>100</number>
            </property>
            <property name="maximum">
-            <number>2000</number>
+            <number>5000</number>
            </property>
            <property name="singleStep">
             <number>100</number>
@@ -603,7 +603,7 @@
             <number>100</number>
            </property>
            <property name="value">
-            <number>600</number>
+            <number>1000</number>
            </property>
            <property name="orientation">
             <enum>Qt::Orientation::Horizontal</enum>
@@ -645,7 +645,7 @@
               </size>
              </property>
              <property name="text">
-              <string>600</string>
+              <string>1000</string>
              </property>
             </widget>
            </item>
@@ -689,7 +689,7 @@
               </size>
              </property>
              <property name="text">
-              <string>600</string>
+              <string>1000</string>
              </property>
              <property name="readOnly">
               <bool>true</bool>
@@ -704,64 +704,68 @@
       <item>
        <widget class="QGroupBox" name="thumb_grp">
         <property name="title">
-         <string>Thumbnail Size</string>
+         <string>Thumbnail</string>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
-          <widget class="QSlider" name="thumb_slider">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimum">
-            <number>50</number>
-           </property>
-           <property name="maximum">
-            <number>500</number>
-           </property>
-           <property name="singleStep">
-            <number>50</number>
-           </property>
-           <property name="pageStep">
-            <number>100</number>
-           </property>
-           <property name="value">
-            <number>100</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-           <property name="tickPosition">
-            <enum>QSlider::TickPosition::TicksAbove</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="thumb_spinbox">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-           <property name="buttonSymbols">
-            <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
-           </property>
-           <property name="minimum">
-            <number>10</number>
-           </property>
-           <property name="maximum">
-            <number>500</number>
-           </property>
-           <property name="value">
-            <number>100</number>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QSlider" name="thumb_slider">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimum">
+              <number>50</number>
+             </property>
+             <property name="maximum">
+              <number>250</number>
+             </property>
+             <property name="singleStep">
+              <number>50</number>
+             </property>
+             <property name="pageStep">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>100</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="tickPosition">
+              <enum>QSlider::TickPosition::TicksAbove</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="thumb_spinbox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+             </property>
+             <property name="minimum">
+              <number>10</number>
+             </property>
+             <property name="maximum">
+              <number>500</number>
+             </property>
+             <property name="value">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -926,7 +930,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>23</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

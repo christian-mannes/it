@@ -1,66 +1,48 @@
 #include "Function.h"
 #include "State.h"
-
-CLASS(Quadratic, "Quadratic function") { public:
-  // Declare your parameters and working variables here
-  complex c;
+CLASS(SampleNewton, "Newton's Method") { public:
+  complex a;
   int depth;
   double escape;
 
-Quadratic(String name, String label, int pspace) : Function(name, label, pspace) {
-  // List every parameter you want to appear in the "parameters" section
-  // using
-  // PARAM(variable, name, type, default-value-parameters-space, default-value-dynamical-space)
-  PARAM(c, "c", complex, complex(0, 0), complex(-1,0));
-  PARAM(depth, "depth", int, 150, 150);
-  PARAM(escape, "escape", double, 1000, 1000);
-  // Set the default range for both spaces
-  setDefaultRangeParameterSpace(-2.2, 1.4, -1.8, 1.8);
-  setDefaultRangeDynamicalSpace(-2, 2, -2, 2);
-}
-
-Function *copy() {
-  Quadratic *f = new Quadratic(name, "", pspace);
-  return f->copyArgsFrom(this);
-}
-
-double iterate_(double x, double y) {
-  int i;
-  complex z, cc;
-  if (PARAMETER_SPACE) {
-    z = complex(0, 0);
-    cc.set(x, y);
-  } else {
-    z = complex(x, y);
-    cc = c;
+  SampleNewton(String name, String label, int pspace) : Function(name, label, pspace) {
+    PARAM(a, "a", complex, complex(0.5, 0.866025), complex(0.5, 0.866025));
+    PARAM(depth, "depth", int, 50, 50);
+    PARAM(escape, "bound", double, 1000, 1000);
+    setDefaultRangeParameterSpace(-1, 2, 0, 3);
+    setDefaultRangeDynamicalSpace(-0.8, 1.8, -1.04, 1.56);
   }
-  for (i = 0; i < depth; i++) {
-    z = z * z + cc;
-    if (norm(z) > escape * escape) break;
+
+  Function *copy() {
+    SampleNewton *f = new SampleNewton(name, "", pspace);
+    return f->copyArgsFrom(this);
   }
-  return (double)i / depth);
-}
 
-// Forward orbit: assign f(x) to x
-void orbit(complex &x) {
-  x =  x * x + c;
-}
-
-// Set the parameter in dynamical space
-void setParameter(double x, double y) {
-  c.set(x, y);
-}
-
-void sandbox() {
-  // Draws the orbit of the critical point
-  complex z = 0;
-  int i;
-  for (i = 0; i < depth; i++) {
-    z = z * z + c;
-    SETPIXEL(z.real(), z.imag(), 100);
+  double iterate_(double x, double y) {
+    int i;
+    complex z;
+    if (PARAMETER_SPACE) {
+      a.set(x, y);
+      z = (1.0+a)/3.0;
+    } else {
+      a.set(0.5, 0.866025);
+      z = complex(x, y);
+    }
+    for (i = 0; i < depth; i++) {
+      z = z*z*(1+a-2*z)/(-a+2*z+2*a*z-3*z*z);
+      if (norm(z-a)<(1/escape)||norm(z-1)<(1/escape)||norm(z)<(1/escape))
+        return (double)i/depth;
+    }
+    return 1.0;
   }
-  SetStrokeColor(0, 0, 0);
-}
+
+  void orbit(complex &z) {
+    z = z*z*(1+a-2*z)/(-a+2*z+2*a*z-3*z*z);
+  }
+
+  void setParameter(double x, double y) {
+    a.set(x, y);
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

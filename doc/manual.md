@@ -250,6 +250,8 @@ The following functions are available in this context:
 
 ## Color Maps and Working with Colors
 
+**Note: color maps are only used with the "old-style" version of iterate (byte iterate(...))**
+
 Color maps map a number from 0 to 255 to a color. The number from 0 to 255 is called the index into the color map. It comes with a number of color maps. Each map is defined in a text file, which contains 255 lines, each with a list of three numbers also between 0 and 255 separated by whitespaec. Each line defines a color using RGB encoding: intensities of red, green, and blue. For example, 0,0,0 represents black, 255,0,0 would be pure red, 255,255,0 is yellow, and 255,255,255 is white. A colormap file looks like this:
 
 ![Colormap definitions](../img/colormapfile.png)
@@ -269,7 +271,7 @@ void setColors() {
 
 Notice that using setColors does not modify the current colormap file permanently.
 
-If you are using the new-style `double iterate_(double x, double y)` function, you can also return a particular color for a point using the `rgb` function. `rgb` takes three arguments, each an int from 0..255.
+If (and **only if**) you are using the new-style `double iterate_(double x, double y)` function, you can also return a particular color for a point using the `rgb` function. `rgb` takes three arguments, each an int from 0..255.
 
 ```c++
 double iterate_(double x, double y) {

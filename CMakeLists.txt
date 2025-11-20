@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(It VERSION 4.0.3 LANGUAGES CXX)
+project(It VERSION 4.0.4 LANGUAGES CXX)
 if (WIN32)
     set(CPACK_PACKAGE_NAME "It")
     set(CPACK_PACKAGE_VERSION "4.0.3")
@@ -80,9 +80,7 @@ qt_add_executable(It
     app-icon.rc
     compile_linux.sh
     deploy.bat
-    builtin_sample_milnor.txt
-    builtin_sample_newton.txt
-    builtin_sample_quadratic.txt
+    builtin.txt
 )
 
 file(GLOB_RECURSE IT_SOURCES "${CMAKE_SOURCE_DIR}/it/*")
@@ -112,12 +110,8 @@ if(APPLE)
     set_source_files_properties(compile_macos.sh PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE template.txt)
     set_source_files_properties(template.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    target_sources(It PRIVATE builtin_sample_quadratic.txt)
-    set_source_files_properties(builtin_sample_quadratic.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    target_sources(It PRIVATE builtin_sample_milnor.txt)
-    set_source_files_properties(builtin_sample_milnor.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    target_sources(It PRIVATE builtin_sample_newton.txt)
-    set_source_files_properties(builtin_sample_newton.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(It PRIVATE builtin.txt)
+    set_source_files_properties(builtin.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE ${IT_ZIP})
     set_source_files_properties(${IT_ZIP} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(It PRIVATE ${MAPS_ZIP})
@@ -171,13 +165,7 @@ elseif(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/template.txt" "${CMAKE_CURRENT_BINARY_DIR}"
     )
     add_custom_command(TARGET It POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_quadratic.txt" "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-    add_custom_command(TARGET It POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_milnor.txt" "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-    add_custom_command(TARGET It POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_newton.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin.txt" "${CMAKE_CURRENT_BINARY_DIR}"
     )
     add_custom_command(TARGET It POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/compile_windows.bat" "${CMAKE_CURRENT_BINARY_DIR}"
@@ -193,9 +181,7 @@ elseif(WIN32)
     install(FILES ${MAPS_ZIP} DESTINATION .)
     install(FILES compile_windows.bat DESTINATION .)
     install(FILES template.txt DESTINATION .)
-    install(FILES builtin_sample_quadratic.txt DESTINATION .)
-    install(FILES builtin_sample_newton.txt DESTINATION .)
-    install(FILES builtin_sample_milnor.txt DESTINATION .)
+    install(FILES builtin.txt DESTINATION .)
     include(CPack)
 else()
     add_custom_command(TARGET It POST_BUILD
@@ -216,13 +202,7 @@ else()
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/template.txt" "${CMAKE_CURRENT_BINARY_DIR}"
     )
     add_custom_command(TARGET It POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_quadratic.txt" "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-    add_custom_command(TARGET It POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_milnor.txt" "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-    add_custom_command(TARGET It POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin_sample_newton.txt" "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/builtin.txt" "${CMAKE_CURRENT_BINARY_DIR}"
     )
     add_custom_command(TARGET It POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/compile_linux.sh" "${CMAKE_CURRENT_BINARY_DIR}"
@@ -243,9 +223,7 @@ else()
     install(FILES ${MAPS_ZIP} DESTINATION .)
     install(FILES compile_linux.sh DESTINATION .)
     install(FILES template.txt DESTINATION .)
-    install(FILES builtin_sample_quadratic.txt DESTINATION .)
-    install(FILES builtin_sample_milnor.txt DESTINATION .)
-    install(FILES builtin_sample_newton.txt DESTINATION .)
+    install(FILES builtin.txt DESTINATION .)
 endif()
 
 target_link_libraries(It PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::PrintSupport Qt6::Svg Qt6::Core Qt6::Network)

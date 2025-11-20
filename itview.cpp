@@ -207,6 +207,9 @@ void ItView::mouseMoveEvent(QMouseEvent *event) {
     }
   } else if (Qt::ShiftModifier == QApplication::keyboardModifiers() || thumbing) {
     if (function->pspace == 1) {
+      if (thumbnail != nullptr && (thumbnail->width() != thumbsize)) {
+        deleteThumbnail();
+      }
       if (thumbnail == nullptr) {
         thumbnail = new QImage(thumbsize, thumbsize, QImage::Format_RGB32);
         thumbstate = new State(function->other, colormap, thumbsize, thumbsize);
@@ -265,6 +268,24 @@ void ItView::wheelEvent(QWheelEvent *event) {
   update();
 }
 
+void ItView::setThumbing(bool flag) {
+  thumbing = flag;
+  if (!thumbing) {
+    deleteThumbnail();
+    update();
+  }
+}
+
+void ItView::acceptThumb() {
+  thumbing = false;
+  deleteThumbnail();
+  if (function->pspace == 1) {
+    function->other->setParameter(state->X(mousex), state->Y(mousey));
+    extern MainWindow *mainWindow;
+    mainWindow->on_dspace_radio_clicked();
+  }
+}
+
 void ItView::keyPressEvent(QKeyEvent *event) {
   if (event->isAutoRepeat()) return;
   int keyPressed = event->key();
@@ -275,14 +296,9 @@ void ItView::keyPressEvent(QKeyEvent *event) {
     randomizeColors();
     update();
   } else if (event->key() == 84) { // 84='t'
-    thumbing = !thumbing;
+    setThumbing(!thumbing);
   } else if (event->key() == 80) { // 80='p'
-    if (function->pspace == 1) {
-      function->other->setParameter(state->X(mousex), state->Y(mousey));
-      extern MainWindow *mainWindow;
-      mainWindow->on_dspace_radio_clicked();
-    }
-    thumbing = false;
+    acceptThumb();
   } else if (event->key() == 68) { // 68='d'
     if (function->pspace == 0) {
       extern MainWindow *mainWindow;
@@ -294,6 +310,8 @@ void ItView::keyPressEvent(QKeyEvent *event) {
     selecting = 0;
     selection.setSize(QSize(0, 0));
     points.clear();
+    thumbing = false;
+    deleteThumbnail();
     update();
   } else if (event->key() == Qt::Key_Shift) {
     qDebug() << "shift down";

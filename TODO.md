@@ -64,14 +64,16 @@
 - [X] Linux version
 
 - [X] Colormap bug (casting etc)
-- [ ] Default size 1000, max higher, weirdness editing size by hand
+- [X] Default size 1000, max higher, weirdness editing size by hand
+- [X] Add built-in functions
+- [X] Thumbnail: limit size
+- [X] Functions cannot be moved up or down in list
 - [ ] Save PDF: tiny picture
-- [ ] Colormap changing weirdness
-- [ ] Change colormap while computing: disable
-- [ ] Add built-in functions
 
 - [X] Custom colormap in code: rgb
-- [ ] Get better colormaps
+- [ ] Get better colormaps; remove some maps
+- [ ] Change colormap while computing: disable
+
 - [ ] Bookmark places
 
 ---Ideas-----------------------------------------------------------------------

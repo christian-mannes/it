@@ -80,6 +80,12 @@ private slots:
 
   void on_actionAbout_triggered();
 
+  void on_resolution_xres_editingFinished();
+
+  void on_thumbnailCheckBox_checkStateChanged(const Qt::CheckState &arg1);
+
+  void on_thumnailAcceptButton_clicked();
+
 private:
   Ui::MainWindow *ui;
   void closeEvent(QCloseEvent *event) override;
